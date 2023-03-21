@@ -1,0 +1,25 @@
+{
+  "extends": "./node_modules/gts/tsconfig-google.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "build",
+
+    // "composite": false,
+    // "declaration": true,
+    // "declarationMap": true,
+    // "esModuleInterop": true,
+    // "forceConsistentCasingInFileNames": true,
+    // "inlineSources": false,
+    "isolatedModules": true,
+    // "moduleResolution": "node",
+    // "preserveWatchOutput": true,
+    // "skipLibCheck": true,
+    // "strict": true
+
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ]
+}
+
