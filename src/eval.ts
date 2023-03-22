@@ -8,7 +8,8 @@
 //     to Evaluators. It also memoizes the Promises returned by Evaluators.
 //   * Evaluators are async functions. They always return Promises.
 export interface Payload {
-  references: Set<string>;
+  line: number;
+  references: Evaluator<unknown>[] | string;
 }
 
 export type Evaluator<R> = {
@@ -110,14 +111,16 @@ type Evaluatorize<T extends readonly unknown[] | []> = {
 // Factory to create an Evaluator for a given function and set of parameters.
 export function func<P extends unknown[], R>(
   f: (...params: P) => R,
-  params: Evaluatorize<P>
+  params: Evaluatorize<P>,
+  line: number
 ): Evaluator<R> {
-  const references = new Set<string>();
-  for (const p of params) {
-    for (const r of p.references.values()) {
-      references.add(r);
-    }
-  }
+  // const references = new Set<string>();
+  // for (const p of params) {
+  //   for (const r of p.references.values()) {
+  //     references.add(r);
+  //   }
+  // }
+  const references = params;
   const evaluator = async (context: Context) => {
     // These links explain why we have to type assert to Promisify<P> after map.
     // https://stackoverflow.com/questions/57913193/how-to-use-array-map-with-tuples-in-typescript
@@ -127,30 +130,33 @@ export function func<P extends unknown[], R>(
     return await f(...awaitedParams);
   };
 
-  return Object.assign(evaluator, {references});
+  return Object.assign(evaluator, {line, references});
 }
 
 // Factory to create an Evaluator for a symbolic reference.
-export function reference<V>(name: string): Evaluator<V> {
-  const references = new Set<string>([name]);
+export function reference<V>(name: string, line: number): Evaluator<V> {
+  const references = name;
   const evaluator = async (context: Context) => {
     const promise = context.get(name);
     return promise as Promise<V>;
   };
 
-  return Object.assign(evaluator, {references});
+  return Object.assign(evaluator, {line, references});
 }
 
 type Literal = string | number | boolean | Array<Literal>;
 
 // Factory to create an Evaluator for a literal value.
-export function literal<V extends Literal>(value: V): Evaluator<V> {
-  const references = new Set<string>();
+export function literal<V extends Literal>(
+  value: V,
+  line: number
+): Evaluator<V> {
+  const references: Evaluator<V>[] = [];
   const evaluator = async () => {
     return Promise.resolve(value);
   };
 
-  return Object.assign(evaluator, {references});
+  return Object.assign(evaluator, {line, references});
 }
 
 export function checkForCycles<T>(symbols: Symbols, evaluator: Evaluator<T>) {
@@ -166,25 +172,46 @@ function checkForCyclesRecursion<T>(
   evaluator: Evaluator<T>
 ) {
   path.push(evaluator);
-  for (const symbol of evaluator.references) {
+  console.log(`push: ${JSON.stringify(path.map(l => l.line))}`);
+  if (typeof evaluator.references === 'string') {
+    const symbol = evaluator.references;
     if (visited.get(symbol)) {
       // We've found a cycle.
       throw new CycleDetectedError(path, symbol);
+    } else {
+      // Follow reference
+      visited.set(symbol, true);
+      const child = symbols.get(symbol);
+      checkForCyclesRecursion(symbols, visited, path, child);
+      visited.set(symbol, false);
     }
-    visited.set(symbol, true);
-    const f = symbols.get(symbol);
-    checkForCyclesRecursion(symbols, visited, path, f);
-    visited.set(symbol, false);
+  } else {
+    for (const child of evaluator.references) {
+      // Visit each child.
+      checkForCyclesRecursion(symbols, visited, path, child);
+    }
   }
   path.pop();
+  console.log('pop');
 }
 
-class CycleDetectedError extends Error {
+export class CycleDetectedError extends Error {
   path: Payload[];
   symbol: string;
   constructor(path: Payload[], symbol: string) {
     super('Cycle detected');
     this.path = path;
     this.symbol = symbol;
+  }
+}
+
+export function formatError(e: unknown) {
+  if (e instanceof CycleDetectedError) {
+    console.log(`Cycle dectected involving symbol "${e.symbol}"`);
+    console.log(`Lines: ${e.path.map(l => l.line).join(', ')}`);
+  } else if (e instanceof Error) {
+    console.log(`Unkown error: ${e.message}`);
+  } else {
+    console.log('Unknown error');
   }
 }

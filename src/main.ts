@@ -1,4 +1,12 @@
-import {Context, func, literal, Symbols, reference} from './eval';
+import {
+  checkForCycles,
+  Context,
+  formatError,
+  func,
+  literal,
+  reference,
+  Symbols,
+} from './eval';
 
 export function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -35,31 +43,62 @@ async function go() {
   //
   // Compilation stage
   //
+  let line = 1;
   const symbols = new Symbols();
 
-  // a = b + c
-  symbols.add('a', func(add, [reference<number>('b'), reference<number>('c')]));
+  // 1: a = b + c
+  symbols.add(
+    'a',
+    func(
+      add,
+      [reference<number>('b', line), reference<number>('c', line)],
+      line
+    )
+  );
+  line++;
 
-  // b = 2
-  symbols.add('b', literal(2));
+  // 2: b = 2
+  symbols.add('b', literal(2, line));
+  line++;
 
-  // c = d * 3
-  symbols.add('c', func(mul, [reference<number>('d'), literal(3)]));
+  // 3: c = d * 3
+  symbols.add(
+    'c',
+    func(mul, [reference<number>('d', line), literal(3, line)], line)
+  );
+  line++;
 
-  // d = 4
-  symbols.add('d', literal(4));
+  // // 4: d = 4
+  // symbols.add('d', literal(4, line++));
+  // 4: d = a
+  symbols.add('d', reference<number>('a', line));
+  line++;
 
-  // return a - 1
-  const expr = func(sub, [reference<number>('a'), literal(1)]);
+  // 5: return a - 1
+  const expr = func(
+    sub,
+    [reference<number>('a', line), literal(1, line)],
+    line
+  );
+  line++;
 
-  //
-  // Execution stage
-  //
-  const context = new Context(symbols);
-  console.log('starting async evaluation');
-  const result = await expr(context);
-  console.log('finished async evaluation');
-  console.log(`result = ${result}`);
+  try {
+    //
+    // Validation stage
+    //
+    checkForCycles(symbols, expr);
+
+    //
+    // Execution stage
+    //
+    const context = new Context(symbols);
+    console.log('starting async evaluation');
+    const result = await expr(context);
+    console.log('finished async evaluation');
+    console.log(`result = ${result}`);
+  } catch (e) {
+    formatError(e);
+  }
 }
 
 go();
