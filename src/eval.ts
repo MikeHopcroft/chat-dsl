@@ -7,7 +7,15 @@
 //   * The Context provides access to a Symbols object that maps identifers
 //     to Evaluators. It also memoizes the Promises returned by Evaluators.
 //   * Evaluators are async functions. They always return Promises.
-export type Evaluator<R> = (context: Context) => Promise<R>;
+export interface Payload {
+  references: Set<string>;
+}
+
+export type Evaluator<R> = {
+  (context: Context): Promise<R>;
+  // references: Set<string>;
+} & Payload;
+// export type Evaluator<R> = {(context: Context) => Promise<R>};
 
 // The Symbols class is used during the compilation stage.
 // The Symbols class maintains a mapping from identifiers to Evaluators.
@@ -92,8 +100,11 @@ type Promisify<T extends readonly unknown[] | []> = {
   -readonly [P in keyof T]: Promise<T[P]>;
 };
 
+// type Evaluatorize<T extends readonly unknown[] | []> = {
+//   -readonly [P in keyof T]: (context: Context) => Promise<T[P]>;
+// };
 type Evaluatorize<T extends readonly unknown[] | []> = {
-  -readonly [P in keyof T]: (context: Context) => Promise<T[P]>;
+  -readonly [P in keyof T]: Evaluator<T[P]>;
 };
 
 // Factory to create an Evaluator for a given function and set of parameters.
@@ -101,7 +112,13 @@ export function func<P extends unknown[], R>(
   f: (...params: P) => R,
   params: Evaluatorize<P>
 ): Evaluator<R> {
-  return async (context: Context) => {
+  const references = new Set<string>();
+  for (const p of params) {
+    for (const r of p.references.values()) {
+      references.add(r);
+    }
+  }
+  const evaluator = async (context: Context) => {
     // These links explain why we have to type assert to Promisify<P> after map.
     // https://stackoverflow.com/questions/57913193/how-to-use-array-map-with-tuples-in-typescript
     // https://stackoverflow.com/questions/65335982/how-to-map-a-typescript-tuple-into-a-new-tuple-using-array-map
@@ -109,19 +126,65 @@ export function func<P extends unknown[], R>(
     const awaitedParams = await Promise.all(promises);
     return await f(...awaitedParams);
   };
+
+  return Object.assign(evaluator, {references});
 }
 
 // Factory to create an Evaluator for a symbolic reference.
 export function reference<V>(name: string): Evaluator<V> {
-  return (context: Context) => {
+  const references = new Set<string>([name]);
+  const evaluator = async (context: Context) => {
     const promise = context.get(name);
     return promise as Promise<V>;
   };
+
+  return Object.assign(evaluator, {references});
 }
 
 type Literal = string | number | boolean | Array<Literal>;
 
 // Factory to create an Evaluator for a literal value.
 export function literal<V extends Literal>(value: V): Evaluator<V> {
-  return () => Promise.resolve(value);
+  const references = new Set<string>();
+  const evaluator = async () => {
+    return Promise.resolve(value);
+  };
+
+  return Object.assign(evaluator, {references});
+}
+
+export function checkForCycles<T>(symbols: Symbols, evaluator: Evaluator<T>) {
+  const visited = new Map<string, boolean>();
+  const path: Payload[] = [];
+  return checkForCyclesRecursion(symbols, visited, path, evaluator);
+}
+
+function checkForCyclesRecursion<T>(
+  symbols: Symbols,
+  visited: Map<string, boolean>,
+  path: Payload[],
+  evaluator: Evaluator<T>
+) {
+  path.push(evaluator);
+  for (const symbol of evaluator.references) {
+    if (visited.get(symbol)) {
+      // We've found a cycle.
+      throw new CycleDetectedError(path, symbol);
+    }
+    visited.set(symbol, true);
+    const f = symbols.get(symbol);
+    checkForCyclesRecursion(symbols, visited, path, f);
+    visited.set(symbol, false);
+  }
+  path.pop();
+}
+
+class CycleDetectedError extends Error {
+  path: Payload[];
+  symbol: string;
+  constructor(path: Payload[], symbol: string) {
+    super('Cycle detected');
+    this.path = path;
+    this.symbol = symbol;
+  }
 }
