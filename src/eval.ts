@@ -144,7 +144,7 @@ export function reference<V>(name: string, line: number): Evaluator<V> {
   return Object.assign(evaluator, {line, references});
 }
 
-type Literal = string | number | boolean | Array<Literal>;
+export type Literal = string | number | boolean | Array<Literal>;
 
 // Factory to create an Evaluator for a literal value.
 export function literal<V extends Literal>(
