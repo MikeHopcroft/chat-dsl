@@ -1,20 +1,15 @@
 # TODO List
 
-* x Cycle detection for references - runtime or compile time
-  * x Runtime check - add enter/leave context calls
-  * x Compile time checks
-    * Annotate function with set of direct references. Compute indirect reference chains after compilation. Might want to add line number parameter to function.
-    * Replace function with a class. Have method for refernce graph and method for eval graph.
-* x README.md
-* x Dev container and CodeSpaces
-* x Grammar for DSL
-* x Parser for DSL
+* x Type system unit tests
+* Implement tuple node
+* Combine type validation with cycle detection
+  * May prefer class over function because of need for type checking method that is specific to type of node.
 * Type checking
   * Convert from functions to classes
     * Payload
-      * Line number or character span (TokenPosition)
-      * References (for cycle detection)
-      * io-ts (or other) type
+      * x Line number or character span (TokenPosition)
+      * References (for cycle detection and type checking)
+      * x io-ts (or other) type
       * Parser for type annotations
   * Compile time
     * Investigate io-ts
@@ -29,7 +24,16 @@
   * Async axios call for completion
   * Extract DSL
   * Run DSL
-* Set up unit testing
+* x Cycle detection for references - runtime or compile time
+  * x Runtime check - add enter/leave context calls
+  * x Compile time checks
+    * Annotate function with set of direct references. Compute indirect reference chains after compilation. Might want to add line number parameter to function.
+    * Replace function with a class. Have method for refernce graph and method for eval graph.
+* x README.md
+* x Dev container and CodeSpaces
+* x Grammar for DSL
+* x Parser for DSL
+* x Set up unit testing
 
 
 Typing scenarios

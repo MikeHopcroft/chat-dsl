@@ -1,9 +1,10 @@
+import {TokenPosition} from 'typescript-parsec';
 import {
   checkForCycles,
   Context,
   formatError,
   func,
-  literal,
+  numberLiteral,
   reference,
   Symbols,
 } from './eval';
@@ -34,6 +35,14 @@ function sub(x: number, y: number) {
   return x - y;
 }
 
+function advance(position: TokenPosition): TokenPosition {
+  return {
+    ...position,
+    rowBegin: position.rowBegin + 1,
+    rowEnd: position.rowEnd + 1,
+  };
+}
+
 // This example computes a - 1, where
 //   a = b + c
 //   b = 2
@@ -43,7 +52,14 @@ async function go() {
   //
   // Compilation stage
   //
-  let line = 1;
+  let position: TokenPosition = {
+    index: 0,
+    rowBegin: 1,
+    rowEnd: 1,
+    columnBegin: 0,
+    columnEnd: 1,
+  };
+
   const symbols = new Symbols();
 
   // 1: a = b + c
@@ -51,36 +67,40 @@ async function go() {
     'a',
     func(
       add,
-      [reference<number>('b', line), reference<number>('c', line)],
-      line
+      [reference<number>('b', position), reference<number>('c', position)],
+      position
     )
   );
-  line++;
+  position = advance(position);
 
   // 2: b = 2
-  symbols.add('b', literal(2, line));
-  line++;
+  symbols.add('b', numberLiteral(2, position));
+  position = advance(position);
 
   // 3: c = d * 3
   symbols.add(
     'c',
-    func(mul, [reference<number>('d', line), literal(3, line)], line)
+    func(
+      mul,
+      [reference<number>('d', position), numberLiteral(3, position)],
+      position
+    )
   );
-  line++;
+  position = advance(position);
 
   // // 4: d = 4
   // symbols.add('d', literal(4, line++));
   // 4: d = a
-  symbols.add('d', reference<number>('a', line));
-  line++;
+  symbols.add('d', reference<number>('a', position));
+  position = advance(position);
 
   // 5: return a - 1
   const expr = func(
     sub,
-    [reference<number>('a', line), literal(1, line)],
-    line
+    [reference<number>('a', position), numberLiteral(1, position)],
+    position
   );
-  line++;
+  position = advance(position);
 
   try {
     //

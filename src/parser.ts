@@ -35,21 +35,21 @@ enum TokenKind {
   Comment,
 }
 
-const tokenNames = [
-  'Number',
-  'String',
-  'Boolean',
-  'Return',
-  'Identifier',
-  'LBracket',
-  'RBracket',
-  'LParen',
-  'RParen',
-  'Comma',
-  'Equals',
-  'Space',
-  'Comment',
-];
+// const tokenNames = [
+//   'Number',
+//   'String',
+//   'Boolean',
+//   'Return',
+//   'Identifier',
+//   'LBracket',
+//   'RBracket',
+//   'LParen',
+//   'RParen',
+//   'Comma',
+//   'Equals',
+//   'Space',
+//   'Comment',
+// ];
 
 const lexer = buildLexer([
   [true, /^\d+(\.\d+)?/g, TokenKind.Number],

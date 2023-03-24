@@ -1,3 +1,5 @@
+import {TokenPosition} from 'typescript-parsec';
+
 // An Evaluator is a function that evaluates an expression in a specific
 // Context.
 //   * The expression is baked into the Evaluator at the time the
@@ -8,8 +10,7 @@
 //     to Evaluators. It also memoizes the Promises returned by Evaluators.
 //   * Evaluators are async functions. They always return Promises.
 export interface Payload {
-  // TokenPosition
-  line: number;
+  position: TokenPosition;
   references: Evaluator<unknown>[] | string;
 }
 
@@ -113,14 +114,8 @@ type Evaluatorize<T extends readonly unknown[] | []> = {
 export function func<P extends unknown[], R>(
   f: (...params: P) => R,
   params: Evaluatorize<P>,
-  line: number
+  position: TokenPosition
 ): Evaluator<R> {
-  // const references = new Set<string>();
-  // for (const p of params) {
-  //   for (const r of p.references.values()) {
-  //     references.add(r);
-  //   }
-  // }
   const references = params;
   const evaluator = async (context: Context) => {
     // These links explain why we have to type assert to Promisify<P> after map.
@@ -131,33 +126,48 @@ export function func<P extends unknown[], R>(
     return await f(...awaitedParams);
   };
 
-  return Object.assign(evaluator, {line, references});
+  return Object.assign(evaluator, {position, references});
 }
 
 // Factory to create an Evaluator for a symbolic reference.
-export function reference<V>(name: string, line: number): Evaluator<V> {
+export function reference<V>(
+  name: string,
+  position: TokenPosition
+): Evaluator<V> {
   const references = name;
   const evaluator = async (context: Context) => {
     const promise = context.get(name);
     return promise as Promise<V>;
   };
 
-  return Object.assign(evaluator, {line, references});
+  return Object.assign(evaluator, {position, references});
 }
 
 export type Literal = string | number | boolean | Array<Literal>;
 
 // Factory to create an Evaluator for a literal value.
-export function literal<V extends Literal>(
+function literal<V extends Literal>(
   value: V,
-  line: number
+  position: TokenPosition
 ): Evaluator<V> {
   const references: Evaluator<V>[] = [];
   const evaluator = async () => {
     return Promise.resolve(value);
   };
 
-  return Object.assign(evaluator, {line, references});
+  return Object.assign(evaluator, {position, references});
+}
+
+export function booleanLiteral(value: boolean, position: TokenPosition) {
+  return literal(value, position);
+}
+
+export function numberLiteral(value: number, position: TokenPosition) {
+  return literal(value, position);
+}
+
+export function stringLiteral(value: string, position: TokenPosition) {
+  return literal(value, position);
 }
 
 export function checkForCycles<T>(symbols: Symbols, evaluator: Evaluator<T>) {
@@ -173,7 +183,6 @@ function checkForCyclesRecursion<T>(
   evaluator: Evaluator<T>
 ) {
   path.push(evaluator);
-  console.log(`push: ${JSON.stringify(path.map(l => l.line))}`);
   if (typeof evaluator.references === 'string') {
     const symbol = evaluator.references;
     if (visited.get(symbol)) {
@@ -193,7 +202,6 @@ function checkForCyclesRecursion<T>(
     }
   }
   path.pop();
-  console.log('pop');
 }
 
 export class CycleDetectedError extends Error {
@@ -209,7 +217,7 @@ export class CycleDetectedError extends Error {
 export function formatError(e: unknown) {
   if (e instanceof CycleDetectedError) {
     console.log(`Cycle dectected involving symbol "${e.symbol}"`);
-    console.log(`Lines: ${e.path.map(l => l.line).join(', ')}`);
+    console.log(`Lines: ${e.path.map(l => l.position.rowBegin).join(', ')}`);
   } else if (e instanceof Error) {
     console.log(`Unkown error: ${e.message}`);
   } else {

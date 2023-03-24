@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
-enum Types {
+
+export enum Types {
   Boolean,
   Function,
   Number,
@@ -49,15 +50,19 @@ export function Function<
   R extends Type<unknown>
 >(parameters: P, returns: R) {
   return {
-    tag: Types.Tuple,
+    tag: Types.Function,
     parameters,
     returns,
-  } as unknown as (...x: Typify<P>) => Typeof<R>;
+  } as unknown as Type<(...x: Typify<P>) => Typeof<R>>;
   // (Type<Typify<P>>) => Type<Typify<R>>;
 }
 
-type x = Typify<[Type<string>, Type<string>]>;
-type s = Typeof<typeof String>;
-const t = Tuple(String, Number, Boolean, Tuple(Boolean, String));
-type t = Typeof<typeof t>;
-const f = Function([String, Number], Boolean);
+export function check(left: Type<unknown>, right: Type<unknown>) {
+  return _.isEqual(left, right);
+}
+
+// type x = Typify<[Type<string>, Type<string>]>;
+// type s = Typeof<typeof String>;
+// const t = Tuple(String, Number, Boolean, Tuple(Boolean, String));
+// type t = Typeof<typeof t>;
+// const f = Function([String, Number], Boolean);
