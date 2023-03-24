@@ -1,7 +1,14 @@
 # TODO List
 
-* x Type system unit tests
 * Implement tuple node
+* Unit tests
+  * ASTTuple
+  * Cycle detection
+  * SymbolTable
+  * TypeCheckingContext
+  * EvaluationContext
+  * Parser
+* x Type system unit tests
 * Combine type validation with cycle detection
   * May prefer class over function because of need for type checking method that is specific to type of node.
 * Type checking

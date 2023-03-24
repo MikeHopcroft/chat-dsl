@@ -56,7 +56,7 @@ describe('primitive types', () => {
 });
 
 describe('compound types', () => {
-  test('function2', async () => {
+  test('function (valid)', async () => {
     const add: FunctionDeclaration<[number, number], number> = {
       func: jest.fn((a: number, b: number) => a + b),
       paramsType: t.Tuple(t.Number, t.Number),
@@ -73,34 +73,30 @@ describe('compound types', () => {
 
     expect(node.position).toBe(position);
     expect(node.check(tcContext)).toEqual(t.Number);
-    expect(await node.eval(evalContext)).toEqual(3);
+    await expect(await node.eval(evalContext)).toEqual(3);
     expect(add.func).toHaveBeenCalledWith(1, 2);
     expect(add.func).toHaveBeenCalledTimes(1);
   });
 
-  // test('function (invalid)', async () => {
-  //   const f = (a: number, b: number) => a + b;
+  test('function (type mismatch)', async () => {
+    const f = (a: number, b: number) => a + b;
 
-  //   const add: FunctionDeclaration<[unknown, unknown], number> = {
-  //     func: jest.fn(f as (a: unknown, b: unknown) => number),
-  //     paramsType: t.Tuple(t.Number, t.Number),
-  //     returnType: t.Number,
-  //   };
-  //   const node = new ASTFunction(
-  //     add,
-  //     [stringLiteral('hello', position), numberLiteral(2, position)],
-  //     position
-  //   );
+    const add: FunctionDeclaration<[unknown, unknown], number> = {
+      func: jest.fn(f as (a: unknown, b: unknown) => number),
+      paramsType: t.Tuple(t.Number, t.Number),
+      returnType: t.Number,
+    };
+    const node = new ASTFunction(
+      add,
+      [stringLiteral('hello', position), numberLiteral(2, position)],
+      position
+    );
 
-  //   const tcContext = new TypeCheckingContext(symbols);
-  //   const evalContext = new EvaluationContext(symbols);
+    const tcContext = new TypeCheckingContext(symbols);
 
-  //   expect(node.position).toBe(position);
-  //   expect(node.check(tcContext)).toEqual(t.Number);
-  //   expect(await node.eval(evalContext)).toEqual(3);
-  //   expect(add.func).toHaveBeenCalledWith(1, 2);
-  //   expect(add.func).toHaveBeenCalledTimes(1);
-  // });
+    expect(node.position).toBe(position);
+    expect(() => node.check(tcContext)).toThrow('Type checking error.');
+  });
 
   test('reference (valid)', async () => {
     const value = 123;
@@ -112,7 +108,7 @@ describe('compound types', () => {
 
     expect(node.position).toBe(position);
     expect(node.check(tcContext)).toEqual(t.Number);
-    expect(await node.eval(evalContext)).toEqual(value);
+    await expect(await node.eval(evalContext)).toEqual(value);
   });
 
   test('reference (invalid)', async () => {
@@ -123,14 +119,13 @@ describe('compound types', () => {
     const evalContext = new EvaluationContext(symbols);
 
     expect(() => node.check(tcContext)).toThrow('Unknown symbol "a".');
-    expect(async () => await node.eval(evalContext)).toThrow(
+    await expect(async () => await node.eval(evalContext)).rejects.toThrow(
       'Unknown symbol "a".'
     );
   });
-  // Failed reference
+
   // Tuple
   // Cycles
-  // Type mismatch
 });
 
 // describe('Symbols', () => {
