@@ -1,14 +1,23 @@
 import {TokenPosition} from 'typescript-parsec';
 
 import {
+  ASTFunction,
+  ASTReference,
   booleanLiteral,
-  Context,
-  func,
+  // Context,
+  // func,
+  FunctionDeclaration,
   numberLiteral,
-  reference,
+  // reference,
   stringLiteral,
-  Symbols,
-} from '../src/eval';
+  // Symbols,
+} from '../src/ast';
+
+import {EvaluationContext} from '../src/evaluation-context';
+// import {IEvaluationContext, ITypeCheckingContext} from '../src/interfaces';
+import {SymbolTable} from '../src/symbols';
+import {TypeCheckingContext} from '../src/type-checking-context';
+import * as t from '../src/types';
 
 const position: TokenPosition = {
   index: 0,
@@ -18,68 +27,119 @@ const position: TokenPosition = {
   columnEnd: 4,
 };
 
-const symbols = new Symbols();
+const symbols = new SymbolTable();
 
 describe('primitive types', () => {
   test('boolean', async () => {
     const value = true;
-    const expression = booleanLiteral(value, position);
-    const context = new Context(symbols);
-    expect(expression.position).toBe(position);
-    expect(await expression(context)).toEqual(value);
+    const node = booleanLiteral(value, position);
+    expect(node.position).toBe(position);
+    expect(node.check()).toEqual(t.Boolean);
+    expect(await node.eval()).toEqual(value);
   });
 
   test('number', async () => {
     const value = 123;
-    const expression = numberLiteral(value, position);
-    const context = new Context(symbols);
-    expect(expression.position).toBe(position);
-    expect(await expression(context)).toEqual(value);
+    const node = numberLiteral(value, position);
+    expect(node.position).toBe(position);
+    expect(node.check()).toEqual(t.Number);
+    expect(await node.eval()).toEqual(value);
   });
 
   test('string', async () => {
     const value = 'hello';
-    const expression = stringLiteral(value, position);
-    const context = new Context(symbols);
-    expect(expression.position).toBe(position);
-    expect(await expression(context)).toEqual(value);
+    const node = stringLiteral(value, position);
+    expect(node.position).toBe(position);
+    expect(node.check()).toEqual(t.String);
+    expect(await node.eval()).toEqual(value);
   });
 });
 
 describe('compound types', () => {
-  test('function', async () => {
-    const add = (a: number, b: number) => a + b;
-    const expression = func(
+  test('function2', async () => {
+    const add: FunctionDeclaration<[number, number], number> = {
+      func: jest.fn((a: number, b: number) => a + b),
+      paramsType: t.Tuple(t.Number, t.Number),
+      returnType: t.Number,
+    };
+    const node = new ASTFunction(
       add,
       [numberLiteral(1, position), numberLiteral(2, position)],
       position
     );
-    const context = new Context(symbols);
-    expect(expression.position).toBe(position);
-    expect(await expression(context)).toEqual(3);
+
+    const tcContext = new TypeCheckingContext(symbols);
+    const evalContext = new EvaluationContext(symbols);
+
+    expect(node.position).toBe(position);
+    expect(node.check(tcContext)).toEqual(t.Number);
+    expect(await node.eval(evalContext)).toEqual(3);
+    expect(add.func).toHaveBeenCalledWith(1, 2);
+    expect(add.func).toHaveBeenCalledTimes(1);
   });
 
-  test('reference', async () => {
+  // test('function (invalid)', async () => {
+  //   const f = (a: number, b: number) => a + b;
+
+  //   const add: FunctionDeclaration<[unknown, unknown], number> = {
+  //     func: jest.fn(f as (a: unknown, b: unknown) => number),
+  //     paramsType: t.Tuple(t.Number, t.Number),
+  //     returnType: t.Number,
+  //   };
+  //   const node = new ASTFunction(
+  //     add,
+  //     [stringLiteral('hello', position), numberLiteral(2, position)],
+  //     position
+  //   );
+
+  //   const tcContext = new TypeCheckingContext(symbols);
+  //   const evalContext = new EvaluationContext(symbols);
+
+  //   expect(node.position).toBe(position);
+  //   expect(node.check(tcContext)).toEqual(t.Number);
+  //   expect(await node.eval(evalContext)).toEqual(3);
+  //   expect(add.func).toHaveBeenCalledWith(1, 2);
+  //   expect(add.func).toHaveBeenCalledTimes(1);
+  // });
+
+  test('reference (valid)', async () => {
     const value = 123;
-    const symbols = new Symbols([['a', numberLiteral(value, position)]]);
-    const expression = reference('a', position);
-    const context = new Context(symbols);
-    expect(expression.position).toBe(position);
-    expect(await expression(context)).toEqual(value);
+    const symbols = new SymbolTable([['a', numberLiteral(value, position)]]);
+    const node = new ASTReference('a', position);
+
+    const tcContext = new TypeCheckingContext(symbols);
+    const evalContext = new EvaluationContext(symbols);
+
+    expect(node.position).toBe(position);
+    expect(node.check(tcContext)).toEqual(t.Number);
+    expect(await node.eval(evalContext)).toEqual(value);
   });
 
+  test('reference (invalid)', async () => {
+    const symbols = new SymbolTable();
+    const node = new ASTReference('a', position);
+
+    const tcContext = new TypeCheckingContext(symbols);
+    const evalContext = new EvaluationContext(symbols);
+
+    expect(() => node.check(tcContext)).toThrow('Unknown symbol "a".');
+    expect(async () => await node.eval(evalContext)).toThrow(
+      'Unknown symbol "a".'
+    );
+  });
   // Failed reference
-
   // Tuple
+  // Cycles
+  // Type mismatch
 });
 
-describe('Symbols', () => {
-  test('number', () => {
-    expect(true).toBe(true);
-  });
-});
-describe('Context', () => {
-  test('number', () => {
-    expect(true).toBe(true);
-  });
-});
+// describe('Symbols', () => {
+//   test('number', () => {
+//     expect(true).toBe(true);
+//   });
+// });
+// describe('Context', () => {
+//   test('number', () => {
+//     expect(true).toBe(true);
+//   });
+// });

@@ -1,5 +1,14 @@
 import {TokenPosition} from 'typescript-parsec';
 
+// import {
+//   ASTNode,
+//   ASTNodeBase,
+//   IEvaluationContext,
+//   ITypeCheckingContext,
+// } from './interfaces';
+
+// import * as t from './types';
+
 // An Evaluator is a function that evaluates an expression in a specific
 // Context.
 //   * The expression is baked into the Evaluator at the time the
@@ -99,6 +108,36 @@ export class Context {
   }
 }
 
+// class TypeCheckingContext implements ITypeCheckingContext {
+//   symbols: Symbols;
+//   visited = new Map<string, boolean>();
+//   path: ASTNodeBase[] = [];
+
+//   constructor(symbols: Symbols) {
+//     this.symbols = symbols;
+//   }
+
+//   lookup(symbol: string): ASTNode<unknown> {
+//     return this.symbols.get(symbol);
+//   }
+
+//   push(node: ASTNodeBase) {
+//     this.path.push(node);
+//   }
+
+//   pop() {
+//     this.path.pop();
+//   }
+
+//   enterScope(symbol: string) {
+//     this.visited.set(symbol, true);
+//   }
+
+//   exitScope(symbol: string) {
+//     this.visited.set(symbol, true);
+//   }
+// }
+
 type Promisify<T extends readonly unknown[] | []> = {
   -readonly [P in keyof T]: Promise<T[P]>;
 };
@@ -109,6 +148,120 @@ type Promisify<T extends readonly unknown[] | []> = {
 type Evaluatorize<T extends readonly unknown[] | []> = {
   -readonly [P in keyof T]: Evaluator<T[P]>;
 };
+
+// type AST<T extends readonly unknown[] | []> = {
+//   -readonly [P in keyof T]: ASTNode<T[P]>;
+// };
+
+// interface ASTNodeBase {
+//   position: TokenPosition;
+// }
+
+// interface ASTNode<T> extends ASTNodeBase {
+//   check(context: TypeCheckingContext): t.Type<unknown>;
+//   eval(context: Context): Promise<T>;
+// }
+
+// ///////////////////////////////////////////////////////////////////////////////
+// //
+// //
+// //
+// ///////////////////////////////////////////////////////////////////////////////
+export type Literal = string | number | boolean | Array<Literal>;
+
+// class ASTLiteral<T extends Literal> implements ASTNode<T> {
+//   position: TokenPosition;
+//   value: T;
+//   type: t.Type<T>;
+
+//   constructor(value: T, type: t.Type<T>, position: TokenPosition) {
+//     this.value = value;
+//     this.type = type;
+//     this.position = position;
+//   }
+
+//   check() {
+//     return this.type;
+//   }
+
+//   eval() {
+//     return Promise.resolve(this.value);
+//   }
+// }
+
+// Factory to create an Evaluator for a literal value.
+function literal<V extends Literal>(
+  value: V,
+  position: TokenPosition
+): Evaluator<V> {
+  const references: Evaluator<V>[] = [];
+  const evaluator = async () => {
+    return Promise.resolve(value);
+  };
+
+  return Object.assign(evaluator, {position, references});
+}
+
+export function booleanLiteral(value: boolean, position: TokenPosition) {
+  return literal(value, position);
+}
+
+export function numberLiteral(value: number, position: TokenPosition) {
+  return literal(value, position);
+}
+
+export function stringLiteral(value: string, position: TokenPosition) {
+  return literal(value, position);
+}
+
+// ///////////////////////////////////////////////////////////////////////////////
+// //
+// //
+// //
+// ///////////////////////////////////////////////////////////////////////////////
+// interface FunctionDeclaration<P extends unknown[], R> {
+//   func: (...params: P) => R;
+//   paramsType: t.Type<P>;
+//   returnType: t.Type<R>;
+// }
+
+// class ASTFunction<P extends unknown[], R> implements ASTNode<R> {
+//   func: FunctionDeclaration<P, R>;
+//   params: AST<P>;
+//   position: TokenPosition;
+
+//   constructor(
+//     func: FunctionDeclaration<P, R>,
+//     params: AST<P>,
+//     position: TokenPosition
+//   ) {
+//     this.func = func;
+//     this.params = params;
+//     this.position = position;
+//   }
+
+//   check(context: TypeCheckingContext): t.Type<R> {
+//     // Verify parameters, check for cycles
+//     context.push(this);
+//     const types = t.Tuple(...this.params.map(p => p.check(context)));
+//     if (!t.check(this.func.paramsType, types)) {
+//       throw new Error('Type checking error.');
+//     }
+//     context.pop();
+
+//     // Then return type.
+//     return this.func.returnType;
+//   }
+
+//   async eval(context: Context) {
+//     // These links explain why we have to type assert to Promisify<P> after map.
+//     // https://stackoverflow.com/questions/57913193/how-to-use-array-map-with-tuples-in-typescript
+//     // https://stackoverflow.com/questions/65335982/how-to-map-a-typescript-tuple-into-a-new-tuple-using-array-map
+//     const promises = this.params.map(f => f(context)) as Promisify<P>;
+//     const awaitedParams = await Promise.all(promises);
+//     return await this.func(...awaitedParams);
+//   }
+// }
 
 // Factory to create an Evaluator for a given function and set of parameters.
 export function func<P extends unknown[], R>(
@@ -141,33 +294,6 @@ export function reference<V>(
   };
 
   return Object.assign(evaluator, {position, references});
-}
-
-export type Literal = string | number | boolean | Array<Literal>;
-
-// Factory to create an Evaluator for a literal value.
-function literal<V extends Literal>(
-  value: V,
-  position: TokenPosition
-): Evaluator<V> {
-  const references: Evaluator<V>[] = [];
-  const evaluator = async () => {
-    return Promise.resolve(value);
-  };
-
-  return Object.assign(evaluator, {position, references});
-}
-
-export function booleanLiteral(value: boolean, position: TokenPosition) {
-  return literal(value, position);
-}
-
-export function numberLiteral(value: number, position: TokenPosition) {
-  return literal(value, position);
-}
-
-export function stringLiteral(value: string, position: TokenPosition) {
-  return literal(value, position);
 }
 
 export function checkForCycles<T>(symbols: Symbols, evaluator: Evaluator<T>) {
