@@ -157,7 +157,7 @@ PROGRAM.setPattern(seq(rep_sc(VARDEC), RETURN));
 // const a = expectSingleResult(expectEOF(EXPR.parse(lexer.parse(text))));
 // console.log(a);
 
-const text = 'a = [1, "hi", [1,2,3], abc, true, false] return 54321';
+const text = 'a = [1, "hi", [1,2,3], abc, true, false] \n return return 54321';
 // const text = 'return 1';
 const a = expectSingleResult(expectEOF(PROGRAM.parse(lexer.parse(text))));
 console.log(a);

@@ -8,6 +8,7 @@
 //     to Evaluators. It also memoizes the Promises returned by Evaluators.
 //   * Evaluators are async functions. They always return Promises.
 export interface Payload {
+  // TokenPosition
   line: number;
   references: Evaluator<unknown>[] | string;
 }

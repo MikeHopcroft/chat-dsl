@@ -12,7 +12,7 @@
 * Type checking
   * Convert from functions to classes
     * Payload
-      * Line number or character span
+      * Line number or character span (TokenPosition)
       * References (for cycle detection)
       * io-ts (or other) type
       * Parser for type annotations
@@ -21,7 +21,15 @@
     * Implement a slice of io-ts
   * Runtime
 * Skills repository
+  * Skills repository query and continue skill
+  * Skill chaining
 * GPTSkill
+  * Configure system message with building blocks
+    * System message builder / template
+  * Async axios call for completion
+  * Extract DSL
+  * Run DSL
+* Set up unit testing
 
 
 Typing scenarios
