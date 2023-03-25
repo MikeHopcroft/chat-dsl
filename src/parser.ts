@@ -1,23 +1,30 @@
 import {
+  alt,
+  apply,
   buildLexer,
   expectEOF,
   expectSingleResult,
+  kmid,
+  kright,
+  list_sc,
+  opt,
+  rep_sc,
   rule,
+  seq,
+  tok,
   Token,
 } from 'typescript-parsec';
 
 import {
-  alt,
-  apply,
-  kmid,
-  kright,
-  list_sc,
-  // lrec_sc,
-  rep_sc,
-  seq,
-  // str,
-  tok,
-} from 'typescript-parsec';
+  ASTLiteral,
+  ASTReference,
+  ASTTuple,
+  booleanLiteral,
+  numberLiteral,
+  stringLiteral,
+} from './ast';
+
+import {ASTNode} from './interfaces';
 
 enum TokenKind {
   Number,
@@ -52,7 +59,7 @@ enum TokenKind {
 // ];
 
 const lexer = buildLexer([
-  [true, /^\d+(\.\d+)?/g, TokenKind.Number],
+  [true, /^-?\d+(\.\d+)?/g, TokenKind.Number],
   [true, /^"[^"]*"/g, TokenKind.String],
   [true, /^(true|false)/g, TokenKind.Boolean],
   [true, /^return/g, TokenKind.Return],
@@ -89,51 +96,72 @@ const lexer = buildLexer([
 
 // console.log(JSON.stringify(tokens, null, 2));
 
-import {Literal} from './eval';
+import {SymbolTable} from './symbol-table';
 
-function applyNumber(value: Token<TokenKind.Number>): number {
-  return +value.text;
+function applyNumber(value: Token<TokenKind.Number>): ASTLiteral<number> {
+  return numberLiteral(Number(value.text), value.pos);
 }
 
-function applyIdentifier(value: Token<TokenKind.Identifier>): string {
-  return '@' + value.text;
+function applyIdentifier(
+  value: Token<TokenKind.Identifier>
+): ASTReference<string> {
+  return new ASTReference(value.text, value.pos);
+}
+
+interface VarDec {
+  symbol: string;
+  node: ASTNode<unknown>;
 }
 
 function applyVarDec(
-  value: [Token<TokenKind.Identifier>, Token<TokenKind.Equals>, Literal]
-): string {
-  return '#' + value[0].text + ' = ' + JSON.stringify(value[2]);
+  value: [
+    Token<TokenKind.Identifier>,
+    Token<TokenKind.Equals>,
+    ASTNode<unknown>
+  ]
+): VarDec {
+  return {symbol: value[0].text, node: value[2]};
 }
 
-function applyString(value: Token<TokenKind.String>): string {
-  return value.text.slice(1, -1);
+function applyString(value: Token<TokenKind.String>): ASTLiteral<string> {
+  return stringLiteral(value.text.slice(1, -1), value.pos);
 }
 
-function applyBoolean(value: Token<TokenKind.Boolean>): boolean {
-  return value.text === 'true';
+function applyBoolean(value: Token<TokenKind.Boolean>): ASTLiteral<boolean> {
+  return booleanLiteral(value.text === 'true', value.pos);
 }
 
-const EXPR = rule<TokenKind, Literal>();
+type TokenRange = [Token<TokenKind> | undefined, Token<TokenKind> | undefined];
+
+function applyTuple(
+  value: ASTNode<unknown>[] | undefined,
+  tokenRange: TokenRange
+): ASTTuple<unknown[]> {
+  // TODO: sort out position
+  // TODO: tokenRange can be undefined
+  return new ASTTuple(value ?? [], tokenRange[0]!.pos);
+}
+
+const EXPR = rule<TokenKind, ASTNode<unknown>>();
 
 EXPR.setPattern(
   alt(
     apply(tok(TokenKind.Number), applyNumber),
     apply(tok(TokenKind.String), applyString),
     apply(tok(TokenKind.Boolean), applyBoolean),
-    // apply(
-    //   seq(tok(TokenKind.Identifier), tok(TokenKind.Equals), EXPR),
-    //   applyVarDec
-    // ),
     apply(tok(TokenKind.Identifier), applyIdentifier),
-    kmid(
-      tok(TokenKind.LBracket),
-      list_sc(EXPR, tok(TokenKind.Comma)),
-      tok(TokenKind.RBracket)
+    apply(
+      kmid(
+        tok(TokenKind.LBracket),
+        opt(list_sc(EXPR, tok(TokenKind.Comma))),
+        tok(TokenKind.RBracket)
+      ),
+      applyTuple
     )
   )
 );
 
-const VARDEC = rule<TokenKind, Literal>();
+const VARDEC = rule<TokenKind, VarDec>();
 VARDEC.setPattern(
   apply(
     seq(tok(TokenKind.Identifier), tok(TokenKind.Equals), EXPR),
@@ -143,8 +171,25 @@ VARDEC.setPattern(
 
 const RETURN = kright(tok(TokenKind.Return), EXPR);
 
-const PROGRAM = rule<TokenKind, Literal>();
-PROGRAM.setPattern(seq(rep_sc(VARDEC), RETURN));
+const PROGRAM = rule<TokenKind, Program>();
+PROGRAM.setPattern(apply(seq(rep_sc(VARDEC), RETURN), applyProgram));
+
+export interface Program {
+  symbols: SymbolTable;
+  expression: ASTNode<unknown>;
+}
+
+function applyProgram([vardecs, expression]: [
+  VarDec[],
+  ASTNode<unknown>
+]): Program {
+  const symbols = new SymbolTable(vardecs.map(x => [x.symbol, x.node]));
+  return {symbols, expression};
+}
+
+export function parse(text: string): Program {
+  return expectSingleResult(expectEOF(PROGRAM.parse(lexer.parse(text))));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // let token = lexer.parse('a=b(1,2) // hi there \nreturn a');
@@ -157,7 +202,7 @@ PROGRAM.setPattern(seq(rep_sc(VARDEC), RETURN));
 // const a = expectSingleResult(expectEOF(EXPR.parse(lexer.parse(text))));
 // console.log(a);
 
-const text = 'a = [1, "hi", [1,2,3], abc, true, false] \n return return 54321';
-// const text = 'return 1';
-const a = expectSingleResult(expectEOF(PROGRAM.parse(lexer.parse(text))));
-console.log(a);
+// const text = 'a = [1, "hi", [1,2,3], abc, true, false] \n return 54321';
+// // const text = 'return 1';
+// const a = expectSingleResult(expectEOF(PROGRAM.parse(lexer.parse(text))));
+// console.log(a);

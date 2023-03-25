@@ -29,7 +29,7 @@ type AST<T extends readonly unknown[] | []> = {
 ///////////////////////////////////////////////////////////////////////////////
 export type Literal = string | number | boolean | Array<Literal>;
 
-class ASTLiteral<T extends Literal> implements ASTNode<T> {
+export class ASTLiteral<T extends Literal> implements ASTNode<T> {
   position: TokenPosition;
   value: T;
   type: t.Type<T>;
@@ -169,8 +169,8 @@ export class ASTReference<T> implements ASTNode<unknown> {
 
   check(context: ITypeCheckingContext): t.Type<T> {
     context.push(this);
-    context.enterScope(this.name);
     const node = context.lookup(this.name);
+    context.enterScope(this.name);
     const type = node.check(context);
     context.exitScope(this.name);
     context.pop();

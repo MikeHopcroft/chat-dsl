@@ -1,10 +1,14 @@
 # TODO List
 
-* Implement tuple node
+* Parser
+  * Negative numbers
+  * Floats
+  * Functions
 * Unit tests
   * x ASTTuple
   * . Cycle detection
     * Error formatting
+    * Chalk formatting
   * x SymbolTable
   * . TypeCheckingContext
   * x EvaluationContext
@@ -14,6 +18,16 @@
   * REPL
   * History
   * History save
+* Skills repository
+  * Skills repository query and continue skill
+  * Skill chaining
+* GPTSkill
+  * Configure system message with building blocks
+    * System message builder / template
+  * Async axios call for completion
+  * Extract DSL
+  * Run DSL
+* x Implement tuple node
 * x Type system unit tests
 * Combine type validation with cycle detection
   * May prefer class over function because of need for type checking method that is specific to type of node.
@@ -28,15 +42,6 @@
     * Investigate io-ts
     * Implement a slice of io-ts
   * Runtime
-* Skills repository
-  * Skills repository query and continue skill
-  * Skill chaining
-* GPTSkill
-  * Configure system message with building blocks
-    * System message builder / template
-  * Async axios call for completion
-  * Extract DSL
-  * Run DSL
 * x Cycle detection for references - runtime or compile time
   * x Runtime check - add enter/leave context calls
   * x Compile time checks
