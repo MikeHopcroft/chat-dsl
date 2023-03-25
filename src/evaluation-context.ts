@@ -28,9 +28,6 @@ export class EvaluationContext implements IEvaluationContext {
       // We've never evaluated this identifier.
       // Look up the associated Evaluator.
       const node = this.symbols.get(name);
-      if (node === undefined) {
-        throw new Error(`Reference to unknown symbol "${name}".`);
-      }
 
       // Evaluate it
       promise = node.eval(this);

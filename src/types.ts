@@ -25,7 +25,7 @@ export const String = {
   tag: Types.String,
 } as Type<string>;
 
-export type Typeof<T extends Type<any>> = T['_type'];
+export type Typeof<T extends Type<unknown>> = T['_type'];
 
 // type Typify<T extends readonly Type<unknown>[] | []> = {
 //   -readonly [P in keyof T]: T[P]['_type'];
@@ -61,15 +61,8 @@ export function Function<
     parameters,
     returns,
   } as unknown as Type<(...x: Typify<P>) => Typeof<R>>;
-  // (Type<Typify<P>>) => Type<Typify<R>>;
 }
 
 export function check(left: Type<unknown>, right: Type<unknown>) {
   return _.isEqual(left, right);
 }
-
-// type x = Typify<[Type<string>, Type<string>]>;
-// type s = Typeof<typeof String>;
-// const t = Tuple(String, Number, Boolean, Tuple(Boolean, String));
-// type t = Typeof<typeof t>;
-// const f = Function([String, Number], Boolean);

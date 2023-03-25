@@ -86,14 +86,13 @@ export class ASTTuple<P extends unknown[]> implements ASTNode<P> {
   }
 
   check(context: ITypeCheckingContext): t.Type<unknown> {
-    // Verify parameters, check for cycles
+    // Check for cycles
     context.push(this);
     const types = this.elements.map(p => p.check(context)) as t.TypeWrap<P>; // as t.Type<unknown>[]; //t.TypeWrap<P>;
-    // type x = t.Typify<typeof types>;
     const type = t.Tuple(...types);
     context.pop();
 
-    return type as t.Type<unknown>; // t.TypeWrap<P>;
+    return type as t.Type<unknown>;
   }
 
   async eval(context: IEvaluationContext): Promise<P> {
@@ -102,7 +101,6 @@ export class ASTTuple<P extends unknown[]> implements ASTNode<P> {
     // https://stackoverflow.com/questions/65335982/how-to-map-a-typescript-tuple-into-a-new-tuple-using-array-map
     const promises = this.elements.map(p => p.eval(context)) as Promisify<P>;
     return await Promise.all(promises);
-    // return [...awaitedParams];
   }
 }
 
@@ -160,7 +158,7 @@ export class ASTFunction<P extends unknown[], R> implements ASTNode<R> {
 // ASTReference
 //
 ///////////////////////////////////////////////////////////////////////////////
-export class ASTReference implements ASTNode<unknown> {
+export class ASTReference<T> implements ASTNode<unknown> {
   name: string;
   position: TokenPosition;
 
@@ -169,17 +167,17 @@ export class ASTReference implements ASTNode<unknown> {
     this.position = position;
   }
 
-  check(context: ITypeCheckingContext): t.Type<unknown> {
+  check(context: ITypeCheckingContext): t.Type<T> {
     context.push(this);
     context.enterScope(this.name);
     const node = context.lookup(this.name);
     const type = node.check(context);
     context.exitScope(this.name);
     context.pop();
-    return type;
+    return type as t.Type<T>;
   }
 
   async eval(context: IEvaluationContext) {
-    return context.get(this.name);
+    return context.get(this.name) as Promise<T>;
   }
 }

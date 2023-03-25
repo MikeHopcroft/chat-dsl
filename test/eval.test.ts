@@ -11,7 +11,7 @@ import {
 } from '../src/ast';
 
 import {EvaluationContext} from '../src/evaluation-context';
-import {SymbolTable} from '../src/symbols';
+import {SymbolTable} from '../src/symbol-table';
 import {TypeCheckingContext} from '../src/type-checking-context';
 import * as t from '../src/types';
 

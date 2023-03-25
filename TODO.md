@@ -2,12 +2,18 @@
 
 * Implement tuple node
 * Unit tests
-  * ASTTuple
-  * Cycle detection
-  * SymbolTable
-  * TypeCheckingContext
-  * EvaluationContext
+  * x ASTTuple
+  * . Cycle detection
+    * Error formatting
+  * x SymbolTable
+  * . TypeCheckingContext
+  * x EvaluationContext
   * Parser
+* Error decoding
+* REPL
+  * REPL
+  * History
+  * History save
 * x Type system unit tests
 * Combine type validation with cycle detection
   * May prefer class over function because of need for type checking method that is specific to type of node.
