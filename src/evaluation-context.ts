@@ -1,4 +1,9 @@
-import {IEvaluationContext, ISymbolTable} from './interfaces';
+import {
+  IEvaluationContext,
+  ISkillsRepository,
+  ISymbolTable,
+  Skill,
+} from './interfaces';
 
 // The Context class is used during the execution stage.
 // A new Context should be created for each top-level evaluation.
@@ -10,11 +15,13 @@ import {IEvaluationContext, ISymbolTable} from './interfaces';
 // is invoked and the resulting Promise is memoized for future calls
 // to Context.get().
 export class EvaluationContext implements IEvaluationContext {
+  skills: ISkillsRepository;
   symbols: ISymbolTable;
   promises = new Map<string, Promise<unknown>>();
 
   // Construct a Context, based on a Symbols table.
-  constructor(symbols: ISymbolTable) {
+  constructor(skills: ISkillsRepository, symbols: ISymbolTable) {
+    this.skills = skills;
     this.symbols = symbols;
   }
 
@@ -36,5 +43,9 @@ export class EvaluationContext implements IEvaluationContext {
       this.promises.set(name, promise);
     }
     return promise;
+  }
+
+  skill(name: string): Skill<unknown[], unknown> {
+    return this.skills.get(name);
   }
 }

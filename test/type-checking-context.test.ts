@@ -1,11 +1,8 @@
 import {TokenPosition} from 'typescript-parsec';
 
-import {
-  ASTFunction,
-  ASTReference,
-  FunctionDeclaration,
-  numberLiteral,
-} from '../src/ast';
+import {ASTFunction, ASTReference, numberLiteral} from '../src/ast';
+import {FunctionDeclaration} from '../src/interfaces';
+import {SkillsRepository} from '../src/skills-repository';
 import {SymbolTable} from '../src/symbol-table';
 import {
   CycleDetectedError,
@@ -42,6 +39,7 @@ describe('TypeCheckingContext', () => {
       returnType: t.Number,
     };
 
+    const skills = new SkillsRepository();
     const symbols = new SymbolTable();
     symbols.add(
       'a',
@@ -72,7 +70,7 @@ describe('TypeCheckingContext', () => {
       position
     );
 
-    const context = new TypeCheckingContext(symbols);
+    const context = new TypeCheckingContext(skills, symbols);
     expect(() => node.check(context)).toThrow(CycleDetectedError);
   });
 });

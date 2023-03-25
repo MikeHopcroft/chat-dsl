@@ -1,10 +1,21 @@
 # TODO List
 
+* Skills repository
+  * ASTFunction takes function name, rather than lambda
+  * Consider combining Skill and FunctionDeclaration
+  * Consider typing skills by function type instead of P and R
+  * check() looks up skill
+  * eval() looks up skill
+  * Parser generates ASTFunction
+  * Unit tests
 * Parser
-  * Negative numbers
+  * x Negative numbers
   * Floats
   * Functions
+    * Skill repository
+    * Type checking
 * Unit tests
+  * Skill repository
   * x ASTTuple
   * . Cycle detection
     * Error formatting

@@ -1,6 +1,11 @@
 import {TokenPosition} from 'typescript-parsec';
 
-import {ASTNode, IEvaluationContext, ITypeCheckingContext} from './interfaces';
+import {
+  ASTNode,
+  FunctionDeclaration,
+  IEvaluationContext,
+  ITypeCheckingContext,
+} from './interfaces';
 import * as t from './types';
 
 type Promisify<T extends readonly unknown[] | []> = {
@@ -109,11 +114,11 @@ export class ASTTuple<P extends unknown[]> implements ASTNode<P> {
 // ASTFunction
 //
 ///////////////////////////////////////////////////////////////////////////////
-export interface FunctionDeclaration<P extends unknown[], R> {
-  func: (...params: P) => R;
-  paramsType: t.Type<P>;
-  returnType: t.Type<R>;
-}
+// export interface FunctionDeclaration<P extends unknown[], R> {
+//   func: (...params: P) => R;
+//   paramsType: t.Type<P>;
+//   returnType: t.Type<R>;
+// }
 
 export class ASTFunction<P extends unknown[], R> implements ASTNode<R> {
   func: FunctionDeclaration<P, R>;

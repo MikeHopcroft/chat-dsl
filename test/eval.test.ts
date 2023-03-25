@@ -5,12 +5,13 @@ import {
   ASTReference,
   ASTTuple,
   booleanLiteral,
-  FunctionDeclaration,
   numberLiteral,
   stringLiteral,
 } from '../src/ast';
 
 import {EvaluationContext} from '../src/evaluation-context';
+import {FunctionDeclaration} from '../src/interfaces';
+import {SkillsRepository} from '../src/skills-repository';
 import {SymbolTable} from '../src/symbol-table';
 import {TypeCheckingContext} from '../src/type-checking-context';
 import * as t from '../src/types';
@@ -23,6 +24,7 @@ const position: TokenPosition = {
   columnEnd: 4,
 };
 
+const skills = new SkillsRepository();
 const symbols = new SymbolTable();
 
 describe('primitive types', () => {
@@ -64,8 +66,8 @@ describe('compound types', () => {
       position
     );
 
-    const tcContext = new TypeCheckingContext(symbols);
-    const evalContext = new EvaluationContext(symbols);
+    const tcContext = new TypeCheckingContext(skills, symbols);
+    const evalContext = new EvaluationContext(skills, symbols);
 
     expect(node.position).toBe(position);
     expect(node.check(tcContext)).toEqual(t.Number);
@@ -88,7 +90,7 @@ describe('compound types', () => {
       position
     );
 
-    const tcContext = new TypeCheckingContext(symbols);
+    const tcContext = new TypeCheckingContext(skills, symbols);
 
     expect(node.position).toBe(position);
     expect(() => node.check(tcContext)).toThrow('Type checking error.');
@@ -99,8 +101,8 @@ describe('compound types', () => {
     const symbols = new SymbolTable([['a', numberLiteral(value, position)]]);
     const node = new ASTReference('a', position);
 
-    const tcContext = new TypeCheckingContext(symbols);
-    const evalContext = new EvaluationContext(symbols);
+    const tcContext = new TypeCheckingContext(skills, symbols);
+    const evalContext = new EvaluationContext(skills, symbols);
 
     expect(node.position).toBe(position);
     expect(node.check(tcContext)).toEqual(t.Number);
@@ -111,8 +113,8 @@ describe('compound types', () => {
     const symbols = new SymbolTable();
     const node = new ASTReference('a', position);
 
-    const tcContext = new TypeCheckingContext(symbols);
-    const evalContext = new EvaluationContext(symbols);
+    const tcContext = new TypeCheckingContext(skills, symbols);
+    const evalContext = new EvaluationContext(skills, symbols);
 
     expect(() => node.check(tcContext)).toThrow('Unknown symbol "a".');
     await expect(async () => await node.eval(evalContext)).rejects.toThrow(
@@ -134,8 +136,8 @@ describe('compound types', () => {
       position
     );
 
-    const tcContext = new TypeCheckingContext(symbols);
-    const evalContext = new EvaluationContext(symbols);
+    const tcContext = new TypeCheckingContext(skills, symbols);
+    const evalContext = new EvaluationContext(skills, symbols);
 
     expect(node.position).toBe(position);
     expect(node.check(tcContext)).toEqual(

@@ -1,8 +1,10 @@
 import {TokenPosition} from 'typescript-parsec';
 
-import {ASTFunction, FunctionDeclaration, numberLiteral} from '../src/ast';
+import {ASTFunction, numberLiteral} from '../src/ast';
 
 import {EvaluationContext} from '../src/evaluation-context';
+import {FunctionDeclaration} from '../src/interfaces';
+import {SkillsRepository} from '../src/skills-repository';
 import {SymbolTable} from '../src/symbol-table';
 import * as t from '../src/types';
 
@@ -26,12 +28,13 @@ describe('EvaluationContext', () => {
       [numberLiteral(1, position), numberLiteral(2, position)],
       position
     );
+    const skills = new SkillsRepository();
     const symbols = new SymbolTable([
       ['a', node],
       ['b', node],
     ]);
 
-    const evalContext = new EvaluationContext(symbols);
+    const evalContext = new EvaluationContext(skills, symbols);
 
     expect(await evalContext.get('a')).toBe(3);
     expect(add.func).toHaveBeenCalledTimes(1);

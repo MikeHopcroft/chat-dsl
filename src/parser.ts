@@ -16,6 +16,7 @@ import {
 } from 'typescript-parsec';
 
 import {
+  ASTFunction,
   ASTLiteral,
   ASTReference,
   ASTTuple,
@@ -142,6 +143,21 @@ function applyTuple(
   return new ASTTuple(value ?? [], tokenRange[0]!.pos);
 }
 
+// function applyFunction(
+//   [symbol, params]: [
+//     Token<TokenKind.Identifier>,
+//     ASTNode<unknown>[] | undefined
+//   ],
+//   tokenRange: TokenRange
+// ): ASTFunction<unknown[], unknown> {
+//   const add: FunctionDeclaration<unknown[], unknown> = {
+//     func: (a: number, b: number) => a + b,
+//     paramsType: t.Tuple(t.Number, t.Number),
+//     returnType: t.Number,
+//   };
+//   return new ASTFunction();
+// }
+
 const EXPR = rule<TokenKind, ASTNode<unknown>>();
 
 EXPR.setPattern(
@@ -149,6 +165,17 @@ EXPR.setPattern(
     apply(tok(TokenKind.Number), applyNumber),
     apply(tok(TokenKind.String), applyString),
     apply(tok(TokenKind.Boolean), applyBoolean),
+    // apply(
+    //   seq(
+    //     tok(TokenKind.Identifier),
+    //     kmid(
+    //       tok(TokenKind.LBracket),
+    //       opt(list_sc(EXPR, tok(TokenKind.Comma))),
+    //       tok(TokenKind.RBracket)
+    //     )
+    //   ),
+    //   applyFunction
+    // ),
     apply(tok(TokenKind.Identifier), applyIdentifier),
     apply(
       kmid(
