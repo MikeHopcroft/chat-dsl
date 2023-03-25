@@ -31,11 +31,18 @@ export type Typeof<T extends Type<any>> = T['_type'];
 //   -readonly [P in keyof T]: T[P]['_type'];
 // };
 
-type Typify<T extends readonly Type<unknown>[] | []> = T extends [
+export type Typify<T extends readonly Type<unknown>[] | []> = T extends [
   infer Head extends Type<unknown>,
   ...infer Tail extends Type<unknown>[]
 ]
   ? [Head['_type'], ...Typify<Tail>]
+  : [];
+
+export type TypeWrap<T extends readonly unknown[] | []> = T extends [
+  infer Head extends unknown,
+  ...infer Tail extends unknown[]
+]
+  ? [Type<Head>, ...TypeWrap<Tail>]
   : [];
 
 export function Tuple<T extends readonly Type<unknown>[] | []>(...elements: T) {

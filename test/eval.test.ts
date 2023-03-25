@@ -3,18 +3,14 @@ import {TokenPosition} from 'typescript-parsec';
 import {
   ASTFunction,
   ASTReference,
+  ASTTuple,
   booleanLiteral,
-  // Context,
-  // func,
   FunctionDeclaration,
   numberLiteral,
-  // reference,
   stringLiteral,
-  // Symbols,
 } from '../src/ast';
 
 import {EvaluationContext} from '../src/evaluation-context';
-// import {IEvaluationContext, ITypeCheckingContext} from '../src/interfaces';
 import {SymbolTable} from '../src/symbols';
 import {TypeCheckingContext} from '../src/type-checking-context';
 import * as t from '../src/types';
@@ -124,7 +120,35 @@ describe('compound types', () => {
     );
   });
 
-  // Tuple
+  test('tuple', async () => {
+    const node = new ASTTuple(
+      [
+        booleanLiteral(false, position),
+        numberLiteral(1, position),
+        stringLiteral('hello', position),
+        new ASTTuple(
+          [numberLiteral(2, position), stringLiteral('world', position)],
+          position
+        ),
+      ],
+      position
+    );
+
+    const tcContext = new TypeCheckingContext(symbols);
+    const evalContext = new EvaluationContext(symbols);
+
+    expect(node.position).toBe(position);
+    expect(node.check(tcContext)).toEqual(
+      t.Tuple(t.Boolean, t.Number, t.String, t.Tuple(t.Number, t.String))
+    );
+    await expect(await node.eval(evalContext)).toEqual([
+      false,
+      1,
+      'hello',
+      [2, 'world'],
+    ]);
+  });
+
   // Cycles
 });
 
