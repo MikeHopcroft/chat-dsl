@@ -1,3 +1,4 @@
+import {SymbolError} from './errors';
 import {ASTNode} from './interfaces';
 
 // The Symbols class is used during the compilation stage.
@@ -22,7 +23,7 @@ export class SymbolTable {
   // Add another [string, Evaluator<unknown>] binding to the Symbols table.
   add<T>(name: string, value: ASTNode<T>) {
     if (this.symbols.has(name)) {
-      throw new Error(`Duplicate binding for symbol "${name}".`);
+      throw new SymbolError(`Duplicate binding for symbol "${name}".`);
     }
     this.symbols.set(name, value);
   }
@@ -31,7 +32,7 @@ export class SymbolTable {
   get(name: string): ASTNode<unknown> {
     const value = this.symbols.get(name);
     if (value === undefined) {
-      throw new Error(`Unknown symbol "${name}".`);
+      throw new SymbolError(`Unknown symbol "${name}".`);
     }
     return value;
   }

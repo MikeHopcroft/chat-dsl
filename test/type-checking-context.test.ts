@@ -1,13 +1,11 @@
 import {TokenPosition} from 'typescript-parsec';
 
 import {ASTFunction, ASTReference, numberLiteral} from '../src/ast';
-import {FunctionDeclaration} from '../src/interfaces';
+import {CycleDetectedError} from '../src/errors';
+import {Skill} from '../src/interfaces';
 import {SkillsRepository} from '../src/skills-repository';
 import {SymbolTable} from '../src/symbol-table';
-import {
-  CycleDetectedError,
-  TypeCheckingContext,
-} from '../src/type-checking-context';
+import {TypeCheckingContext} from '../src/type-checking-context';
 import * as t from '../src/types';
 
 function advance(position: TokenPosition): TokenPosition {
@@ -33,18 +31,22 @@ describe('TypeCheckingContext', () => {
       columnEnd: 4,
     };
 
-    const add: FunctionDeclaration<[number, number], number> = {
+    const add: Skill<[number, number], number> = {
       func: (a: number, b: number) => a + b,
       paramsType: t.Tuple(t.Number, t.Number),
       returnType: t.Number,
+      name: 'add',
+      description: 'adds two numbers',
     };
 
     const skills = new SkillsRepository();
+    skills.add(add);
+
     const symbols = new SymbolTable();
     symbols.add(
       'a',
       new ASTFunction(
-        add,
+        'add',
         [numberLiteral(1, position), new ASTReference<number>('b', position)],
         position
       )
@@ -54,7 +56,7 @@ describe('TypeCheckingContext', () => {
     symbols.add(
       'b',
       new ASTFunction(
-        add,
+        'add',
         [numberLiteral(2, position), new ASTReference<number>('c', position)],
         position
       )
@@ -65,7 +67,7 @@ describe('TypeCheckingContext', () => {
     position = advance(position);
 
     const node = new ASTFunction(
-      add,
+      'add',
       [numberLiteral(3, position), new ASTReference<number>('a', position)],
       position
     );

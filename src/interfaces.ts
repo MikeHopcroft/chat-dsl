@@ -30,14 +30,11 @@ export interface ASTNode<T> extends ASTNodeBase {
   eval(context: IEvaluationContext): Promise<T>;
 }
 
-export interface FunctionDeclaration<P extends unknown[], R> {
+export interface Skill<P extends unknown[] | [], R> {
   func: (...params: P) => R;
   paramsType: t.Type<P>;
   returnType: t.Type<R>;
-}
 
-export interface Skill<P extends unknown[], R> {
-  func: FunctionDeclaration<P, R>;
   name: string;
   description: string;
 }

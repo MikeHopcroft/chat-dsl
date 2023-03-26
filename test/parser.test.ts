@@ -1,4 +1,37 @@
+import {SkillError} from '../src/errors';
+import {Skill} from '../src/interfaces';
 import {run} from '../src/program';
+import {SkillsRepository} from '../src/skills-repository';
+import * as t from '../src/types';
+
+const add: Skill<[number, number], number> = {
+  func: (a: number, b: number) => a + b,
+  paramsType: t.Tuple(t.Number, t.Number),
+  returnType: t.Number,
+  name: 'add',
+  description: 'adds two numbers',
+};
+
+const mul: Skill<[number, number], number> = {
+  func: (a: number, b: number) => a * b,
+  paramsType: t.Tuple(t.Number, t.Number),
+  returnType: t.Number,
+  name: 'mul',
+  description: 'multiples two numbers',
+};
+
+const reverse: Skill<[string], string> = {
+  func: (s: string) => s.split('').reverse().join(''),
+  paramsType: t.Tuple(t.String),
+  returnType: t.String,
+  name: 'reverse',
+  description: 'reverses a string',
+};
+
+const skills = new SkillsRepository();
+skills.add(add);
+skills.add(mul);
+skills.add(reverse);
 
 describe('primitive types', () => {
   test('boolean', async () => {
@@ -28,12 +61,6 @@ describe('tuples', () => {
     const result = await run(`return ${JSON.stringify(tuple)}`);
     expect(result).toEqual(tuple);
   });
-
-  // test('negative', async () => {
-  //   const tuple = -123;
-  //   const result = await run(`return ${JSON.stringify(tuple)}`);
-  //   expect(result).toEqual(tuple);
-  // });
 
   test('simple', async () => {
     const tuple = [123, 'hello', false];
@@ -78,6 +105,35 @@ describe('references', () => {
     for (const [input, expected] of cases) {
       const result = await run(input);
       expect(result).toEqual(expected);
+    }
+  });
+});
+
+describe('skills', () => {
+  test('valid', async () => {
+    const cases: [string, unknown][] = [
+      ['return add(1,2)', 3],
+      ['return mul(3, 4)', 12],
+      ['return mul(3, add(1, 2))', 9],
+      ['return reverse("hello")', 'olleh'],
+    ];
+
+    for (const [input, expected] of cases) {
+      const result = await run(input, skills);
+      expect(result).toEqual(expected);
+    }
+  });
+
+  test('errors', async () => {
+    const cases: [string, Error][] = [
+      ['return foobar(1,2)', new SkillError('Unknown skill "foobar".')],
+      ['return mul()', new TypeError('Type mismatch')],
+      ['return mul(1)', new TypeError('Type mismatch')],
+      ['return mul("hello")', new TypeError('Type mismatch')],
+    ];
+
+    for (const [input, error] of cases) {
+      await expect(async () => await run(input, skills)).rejects.toThrow(error);
     }
   });
 });

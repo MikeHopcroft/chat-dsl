@@ -3,7 +3,7 @@ import {TokenPosition} from 'typescript-parsec';
 import {ASTFunction, numberLiteral} from '../src/ast';
 
 import {EvaluationContext} from '../src/evaluation-context';
-import {FunctionDeclaration} from '../src/interfaces';
+import {Skill} from '../src/interfaces';
 import {SkillsRepository} from '../src/skills-repository';
 import {SymbolTable} from '../src/symbol-table';
 import * as t from '../src/types';
@@ -18,17 +18,23 @@ const position: TokenPosition = {
 
 describe('EvaluationContext', () => {
   test('get (memoization)', async () => {
-    const add: FunctionDeclaration<[number, number], number> = {
+    const add: Skill<[number, number], number> = {
       func: jest.fn((a: number, b: number) => a + b),
       paramsType: t.Tuple(t.Number, t.Number),
       returnType: t.Number,
+      name: 'add',
+      description: 'adds two numbers',
     };
+
+    const skills = new SkillsRepository();
+    skills.add(add);
+
     const node = new ASTFunction(
-      add,
+      'add',
       [numberLiteral(1, position), numberLiteral(2, position)],
       position
     );
-    const skills = new SkillsRepository();
+
     const symbols = new SymbolTable([
       ['a', node],
       ['b', node],

@@ -1,3 +1,4 @@
+import {CycleDetectedError} from './errors';
 import {
   ASTNode,
   ASTNodeBase,
@@ -44,15 +45,5 @@ export class TypeCheckingContext implements ITypeCheckingContext {
 
   skill(name: string): Skill<unknown[], unknown> {
     return this.skills.get(name);
-  }
-}
-
-export class CycleDetectedError extends Error {
-  path: ASTNodeBase[];
-  symbol: string;
-  constructor(path: ASTNodeBase[], symbol: string) {
-    super('Cycle detected');
-    this.path = path;
-    this.symbol = symbol;
   }
 }

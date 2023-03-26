@@ -10,7 +10,7 @@ import {
 } from '../src/ast';
 
 import {EvaluationContext} from '../src/evaluation-context';
-import {FunctionDeclaration} from '../src/interfaces';
+import {Skill} from '../src/interfaces';
 import {SkillsRepository} from '../src/skills-repository';
 import {SymbolTable} from '../src/symbol-table';
 import {TypeCheckingContext} from '../src/type-checking-context';
@@ -55,13 +55,19 @@ describe('primitive types', () => {
 
 describe('compound types', () => {
   test('function (valid)', async () => {
-    const add: FunctionDeclaration<[number, number], number> = {
+    const add: Skill<[number, number], number> = {
       func: jest.fn((a: number, b: number) => a + b),
       paramsType: t.Tuple(t.Number, t.Number),
       returnType: t.Number,
+      name: 'add',
+      description: 'adds two numbers',
     };
+
+    const skills = new SkillsRepository();
+    skills.add(add);
+
     const node = new ASTFunction(
-      add,
+      'add',
       [numberLiteral(1, position), numberLiteral(2, position)],
       position
     );
@@ -77,15 +83,19 @@ describe('compound types', () => {
   });
 
   test('function (type mismatch)', async () => {
-    const f = (a: number, b: number) => a + b;
-
-    const add: FunctionDeclaration<[unknown, unknown], number> = {
-      func: jest.fn(f as (a: unknown, b: unknown) => number),
+    const add: Skill<[number, number], number> = {
+      func: jest.fn((a: number, b: number) => a + b),
       paramsType: t.Tuple(t.Number, t.Number),
       returnType: t.Number,
+      name: 'add',
+      description: 'adds two numbers',
     };
+
+    const skills = new SkillsRepository();
+    skills.add(add);
+
     const node = new ASTFunction(
-      add,
+      'add',
       [stringLiteral('hello', position), numberLiteral(2, position)],
       position
     );
@@ -93,7 +103,7 @@ describe('compound types', () => {
     const tcContext = new TypeCheckingContext(skills, symbols);
 
     expect(node.position).toBe(position);
-    expect(() => node.check(tcContext)).toThrow('Type checking error.');
+    expect(() => node.check(tcContext)).toThrow('Type mismatch');
   });
 
   test('reference (valid)', async () => {

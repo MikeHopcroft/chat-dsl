@@ -1,19 +1,24 @@
 # TODO List
 
+* Better error message for type mismatch
+  * Need type serializer
 * Skills repository
-  * ASTFunction takes function name, rather than lambda
-  * Consider combining Skill and FunctionDeclaration
-  * Consider typing skills by function type instead of P and R
-  * check() looks up skill
-  * eval() looks up skill
-  * Parser generates ASTFunction
-  * Unit tests
+  * Global skills repository
+  * LLM skill template
+  * Skill summaries
+  * x ASTFunction takes function name, rather than lambda
+  * x Consider combining Skill and FunctionDeclaration
+  * x Consider typing skills by function type instead of P and R
+  * x check() looks up skill
+  * x eval() looks up skill
+  * x Parser generates ASTFunction
+  * x Unit tests
 * Parser
-  * x Negative numbers
   * Floats
-  * Functions
-    * Skill repository
-    * Type checking
+  * x Negative numbers
+  * x Functions
+    * x Skill repository
+    * x Type checking
 * Unit tests
   * Skill repository
   * x ASTTuple
