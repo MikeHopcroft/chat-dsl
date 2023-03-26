@@ -1,6 +1,29 @@
 # TODO List
 
+* Separate node dependencies
+* Monorepo for react app?
+* Move dsl to dsl folder
+* REPL
+  * commander
+  * REPL
+    * chat:
+    * dsl:
+    * prompt prompt_name
+    * log/trace on/off, level, names 
+    * quit
+  * History
+  * History save
+* Skills repository
+  * Skills repository query and continue from skill
+  * Skill chaining
+* LLMSkill
+  * Configure system message with building blocks
+    * System message builder / template
+  * Async axios call for completion
+  * Extract DSL
+  * Run DSL
 * Better error message for type mismatch
+  * Error decoding
   * Need type serializer
 * Skills repository
   * Global skills repository
@@ -29,20 +52,6 @@
   * . TypeCheckingContext
   * x EvaluationContext
   * Parser
-* Error decoding
-* REPL
-  * REPL
-  * History
-  * History save
-* Skills repository
-  * Skills repository query and continue skill
-  * Skill chaining
-* GPTSkill
-  * Configure system message with building blocks
-    * System message builder / template
-  * Async axios call for completion
-  * Extract DSL
-  * Run DSL
 * x Implement tuple node
 * x Type system unit tests
 * Combine type validation with cycle detection
