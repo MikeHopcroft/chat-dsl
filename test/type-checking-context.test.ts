@@ -16,63 +16,63 @@ function advance(position: TokenPosition): TokenPosition {
   };
 }
 
-describe('TypeCheckingContext', () => {
-  test('lookup', () => {});
-  test('push', () => {});
-  test('pop', () => {});
-  test('enterScope', () => {});
-  test('exitScope', () => {});
-  test('cycle detection', () => {
-    let position: TokenPosition = {
-      index: 0,
-      rowBegin: 1,
-      rowEnd: 2,
-      columnBegin: 3,
-      columnEnd: 4,
-    };
+// TODO: consider implementing the following tests:
+// test('lookup', () => {});
+// test('push', () => {});
+// test('pop', () => {});
+// test('enterScope', () => {});
+// test('exitScope', () => {});
 
-    const add: Skill<[number, number], number> = {
-      func: (a: number, b: number) => a + b,
-      paramsType: t.Tuple(t.Number, t.Number),
-      returnType: t.Number,
-      name: 'add',
-      description: 'adds two numbers',
-    };
+test('cycle detection', () => {
+  let position: TokenPosition = {
+    index: 0,
+    rowBegin: 1,
+    rowEnd: 2,
+    columnBegin: 3,
+    columnEnd: 4,
+  };
 
-    const skills = new SkillsRepository();
-    skills.add(add);
+  const add: Skill<[number, number], number> = {
+    func: (a: number, b: number) => a + b,
+    paramsType: t.Tuple(t.Number, t.Number),
+    returnType: t.Number,
+    name: 'add',
+    description: 'adds two numbers',
+  };
 
-    const symbols = new SymbolTable();
-    symbols.add(
-      'a',
-      new ASTFunction(
-        'add',
-        [numberLiteral(1, position), new ASTReference<number>('b', position)],
-        position
-      )
-    );
-    position = advance(position);
+  const skills = new SkillsRepository();
+  skills.add(add);
 
-    symbols.add(
-      'b',
-      new ASTFunction(
-        'add',
-        [numberLiteral(2, position), new ASTReference<number>('c', position)],
-        position
-      )
-    );
-    position = advance(position);
-
-    symbols.add('c', new ASTReference<number>('a', position));
-    position = advance(position);
-
-    const node = new ASTFunction(
+  const symbols = new SymbolTable();
+  symbols.add(
+    'a',
+    new ASTFunction(
       'add',
-      [numberLiteral(3, position), new ASTReference<number>('a', position)],
+      [numberLiteral(1, position), new ASTReference<number>('b', position)],
       position
-    );
+    )
+  );
+  position = advance(position);
 
-    const context = new TypeCheckingContext(skills, symbols);
-    expect(() => node.check(context)).toThrow(CycleDetectedError);
-  });
+  symbols.add(
+    'b',
+    new ASTFunction(
+      'add',
+      [numberLiteral(2, position), new ASTReference<number>('c', position)],
+      position
+    )
+  );
+  position = advance(position);
+
+  symbols.add('c', new ASTReference<number>('a', position));
+  position = advance(position);
+
+  const node = new ASTFunction(
+    'add',
+    [numberLiteral(3, position), new ASTReference<number>('a', position)],
+    position
+  );
+
+  const context = new TypeCheckingContext(skills, symbols);
+  expect(() => node.check(context)).toThrow(CycleDetectedError);
 });

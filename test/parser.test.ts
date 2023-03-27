@@ -4,6 +4,11 @@ import {run} from '../src/program';
 import {SkillsRepository} from '../src/skills-repository';
 import * as t from '../src/types';
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// Sample skills for unit tests
+//
+///////////////////////////////////////////////////////////////////////////////
 const add: Skill<[number, number], number> = {
   func: (a: number, b: number) => a + b,
   paramsType: t.Tuple(t.Number, t.Number),
@@ -33,6 +38,11 @@ skills.add(add);
 skills.add(mul);
 skills.add(reverse);
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// Unit tests
+//
+///////////////////////////////////////////////////////////////////////////////
 describe('primitive types', () => {
   test('boolean', async () => {
     const result = await run('return true');
@@ -75,27 +85,25 @@ describe('tuples', () => {
   });
 });
 
-describe('comprehensive', () => {
-  test('comprehensive', async () => {
-    const values = [
-      // Simple literals
-      true,
-      false,
-      123,
-      -456,
-      'hello',
+test('comprehensive', async () => {
+  const values = [
+    // Simple literals
+    true,
+    false,
+    123,
+    -456,
+    'hello',
 
-      // Tuple literals
-      [],
-      [123, 'hello', false],
-      [123, 'hello', true, [false, [1]]],
-    ];
+    // Tuple literals
+    [],
+    [123, 'hello', false],
+    [123, 'hello', true, [false, [1]]],
+  ];
 
-    for (const value of values) {
-      const result = await run(`return ${JSON.stringify(value)}`);
-      expect(result).toEqual(value);
-    }
-  });
+  for (const value of values) {
+    const result = await run(`return ${JSON.stringify(value)}`);
+    expect(result).toEqual(value);
+  }
 });
 
 describe('references', () => {
@@ -136,4 +144,16 @@ describe('skills', () => {
       await expect(async () => await run(input, skills)).rejects.toThrow(error);
     }
   });
+});
+
+test('comments and white space', async () => {
+  const cases: [string, any][] = [
+    ['  \t\n  a  = 1 b=2 return add(a\n\n, b)', 3],
+    ['a=123 // this is a comment\nreturn a', 123],
+  ];
+
+  for (const [input, expected] of cases) {
+    const result = await run(input, skills);
+    expect(result).toEqual(expected);
+  }
 });
