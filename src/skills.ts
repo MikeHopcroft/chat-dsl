@@ -1,82 +1,66 @@
 import * as t from './types';
 
-// interface Param<T> {
-//   name: string;
-//   description: string;
-//   type: t.Type<T>;
-// }
+export interface Param<T> {
+  name: string;
+  description: string;
+  type: t.Type<T>;
+}
 
-// // export interface Skill<P extends unknown[] | [], R> {
-// //   func: (...params: P) => R;
-// //   paramsType: t.Type<P>;
-// //   returnType: t.Type<R>;
+export interface ReturnValue<T> {
+  description: string;
+  type: t.Type<T>;
+}
 
-// //   name: string;
-// //   description: string;
-// // }
+type ParamsFromTypes<T extends readonly unknown[] | []> = {
+  -readonly [P in keyof T]: Param<T[P]>;
+};
 
-// export interface Skill<P extends Param<unknown>[], R> {
-//   func: (...params: Params2<P>) => R;
-//   params: P;
-//   // paramsType: t.Type<P>;
-//   // returnType: t.Type<R>;
+export interface Skill<P extends unknown[], R> {
+  func: (...params: P) => R;
+  params: ParamsFromTypes<P>;
+  returns: ReturnValue<R>;
 
-//   name: string;
-//   description: string;
-// }
+  name: string;
+  description: string;
+}
 
-// const fooSkill = {
-//   func: (a: number, b: string) => `${a}: ${b}`,
-//   params: [
-//     {
-//       name: 'a',
-//       description: 'description for a',
-//       type: t.Number,
-//     } as Param<number>,
-//     {
-//       name: 'b',
-//       description: 'description for b',
-//       type: t.Boolean,
-//     } as Param<boolean>,
-//   ] as const,
-//   name: 'foo',
-//   description: 'the foo function',
-// };
+function renderSkill<P extends unknown[], R>(skill: Skill<P, R>) {
+  const lines: string[] = [];
+  lines.push(`* ${skill.name}(${skill.params.map(p => p.name).join(', ')})`);
+  lines.push(`  * Description: ${skill.description}`);
+  lines.push('  * Parameters:');
 
-// function convert<P extends Param<unknown>[], R>(s: Skill<P, R>) {
-//   return s;
-// }
+  for (const p of skill.params) {
+    lines.push(`    * ${p.name}: ${t.renderType(p.type)} - ${p.description}`);
+  }
 
-// const ffoo = convert(fooSkill);
+  lines.push('  * Returns:');
+  lines.push(
+    `    * ${t.renderType(skill.returns.type)}: ${skill.returns.description}`
+  );
+  return lines.join('\n');
+}
 
-// const params = [
-//   {
-//     name: 'a',
-//     description: 'description for a',
-//     type: t.Number,
-//   } as Param<number>,
-//   {
-//     name: 'b',
-//     description: 'description for b',
-//     type: t.Boolean,
-//   } as Param<boolean>,
-// ] as const;
+const mySkill: Skill<[number, string], string> = {
+  name: 'bulleted',
+  description: 'A function that generates a numbered list item.',
+  func: (a: number, b: string) => `${a}: ${b}`,
+  params: [
+    {
+      name: 'bullet',
+      description: 'The numerical value to use for the list item bullet.',
+      type: t.Number,
+    },
+    {
+      name: 'text',
+      description: 'The text for this list item.',
+      type: t.String,
+    },
+  ],
+  returns: {
+    description: 'The complete list item with bullet and text',
+    type: t.String,
+  },
+};
 
-// type Params<P extends readonly Param<unknown>[] | []> = P extends [
-//   infer Head extends Param<unknown>,
-//   ...infer Tail extends readonly Param<unknown>[]
-// ]
-//   ? [Head['type'], ...Params<Tail>]
-//   : [];
-
-// type Params2<T extends readonly Param<unknown>[] | []> = {
-//   -readonly [P in keyof T]: T[P]['type']['_type'];
-// };
-
-// type x = Params<typeof params>;
-// type y = Params<[Param<number>, Param<boolean>]>;
-// type z = Params<(Param<number> | Param<boolean>)[]>;
-
-// type x2 = Params2<typeof params>;
-// type y2 = Params2<[Param<number>, Param<boolean>]>;
-// type z2 = Params2<(Param<number> | Param<boolean>)[]>;
+console.log(renderSkill(mySkill));
