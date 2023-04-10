@@ -20,8 +20,11 @@ describe('EvaluationContext', () => {
   test('get (memoization)', async () => {
     const add: Skill<[number, number], number> = {
       func: jest.fn((a: number, b: number) => a + b),
-      paramsType: t.Tuple(t.Number, t.Number),
-      returnType: t.Number,
+      params: [
+        {name: 'a', description: 'description for a', type: t.Number},
+        {name: 'b', description: 'description for b', type: t.Number},
+      ],
+      returns: {description: 'sum', type: t.Number},
       name: 'add',
       description: 'adds two numbers',
     };

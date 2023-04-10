@@ -116,13 +116,13 @@ export class ASTFunction<P extends unknown[]> implements ASTNode<unknown> {
     context.push(this);
     const types = t.Tuple(...this.params.map(p => p.check(context)));
     const skill = context.skill(this.name);
-    if (!t.check(skill.paramsType, types)) {
+    if (!t.check(t.Tuple(...skill.params.map(x => x.type)), types)) {
       throw new TypeError();
     }
     context.pop();
 
     // Then return type.
-    return skill.returnType;
+    return skill.returns.type;
   }
 
   async eval(context: IEvaluationContext) {

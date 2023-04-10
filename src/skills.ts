@@ -1,30 +1,32 @@
 import * as t from './types';
 
-export interface Param<T> {
-  name: string;
-  description: string;
-  type: t.Type<T>;
-}
+import {Skill} from './interfaces';
 
-export interface ReturnValue<T> {
-  description: string;
-  type: t.Type<T>;
-}
+// export interface Param<T> {
+//   name: string;
+//   description: string;
+//   type: t.Type<T>;
+// }
 
-type ParamsFromTypes<T extends readonly unknown[] | []> = {
-  -readonly [P in keyof T]: Param<T[P]>;
-};
+// export interface ReturnValue<T> {
+//   description: string;
+//   type: t.Type<T>;
+// }
 
-export interface Skill<P extends unknown[], R> {
-  func: (...params: P) => R;
-  params: ParamsFromTypes<P>;
-  returns: ReturnValue<R>;
+// type ParamsFromTypes<T extends readonly unknown[] | []> = {
+//   -readonly [P in keyof T]: Param<T[P]>;
+// };
 
-  name: string;
-  description: string;
-}
+// export interface Skill<P extends unknown[], R> {
+//   func: (...params: P) => R;
+//   params: ParamsFromTypes<P>;
+//   returns: ReturnValue<R>;
 
-function renderSkill<P extends unknown[], R>(skill: Skill<P, R>) {
+//   name: string;
+//   description: string;
+// }
+
+export function renderSkill<P extends unknown[], R>(skill: Skill<P, R>) {
   const lines: string[] = [];
   lines.push(`* ${skill.name}(${skill.params.map(p => p.name).join(', ')})`);
   lines.push(`  * Description: ${skill.description}`);

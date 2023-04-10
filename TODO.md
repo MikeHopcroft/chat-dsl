@@ -1,5 +1,16 @@
 # TODO List
 
+* Tactical
+  * Generate entire prompt with
+    * Instructions for writing DSLs
+    * Documentation for skills
+    * Example skills
+  * LLM skill
+    * Prompt skeleton
+    * Injecting parameters
+    * Extracting results
+    * Run method
+  * Extracting return values from skills
 * Repo structure
   * Separate node.js dependencies from web dependencies
   * Monrepo for react app?
