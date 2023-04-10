@@ -147,7 +147,7 @@ describe('skills', () => {
 });
 
 test('comments and white space', async () => {
-  const cases: [string, any][] = [
+  const cases: [string, unknown][] = [
     ['  \t\n  a  = 1 b=2 return add(a\n\n, b)', 3],
     ['a=123 // this is a comment\nreturn a', 123],
   ];

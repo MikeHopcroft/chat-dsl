@@ -1,8 +1,8 @@
 # TODO List
 
 * Repo structure
-  * Separate node.js dependencies from webdependencies
-  * Monorepo for react app?
+  * Separate node.js dependencies from web dependencies
+  * Monrepo for react app?
   * Move dsl to dsl folder
 * REPL
   * commander
