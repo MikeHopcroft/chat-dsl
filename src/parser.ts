@@ -183,6 +183,24 @@ EXPR.setPattern(
   )
 );
 
+const LITERAL_EXPR = rule<TokenKind, ASTNode<unknown>>();
+
+LITERAL_EXPR.setPattern(
+  alt(
+    apply(tok(TokenKind.Number), applyNumber),
+    apply(tok(TokenKind.String), applyString),
+    apply(tok(TokenKind.Boolean), applyBoolean),
+    apply(
+      kmid(
+        tok(TokenKind.LBracket),
+        opt(list_sc(LITERAL_EXPR, tok(TokenKind.Comma))),
+        tok(TokenKind.RBracket)
+      ),
+      applyTuple
+    )
+  )
+);
+
 const VARDEC = rule<TokenKind, VarDec>();
 VARDEC.setPattern(
   apply(
@@ -211,6 +229,10 @@ function applyProgram([vardecs, expression]: [
 
 export function parse(text: string): Program {
   return expectSingleResult(expectEOF(PROGRAM.parse(lexer.parse(text))));
+}
+
+export function parseLiteral(text: string): ASTNode<unknown> {
+  return expectSingleResult(expectEOF(LITERAL_EXPR.parse(lexer.parse(text))));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

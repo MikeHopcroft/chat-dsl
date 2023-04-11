@@ -33,7 +33,7 @@ test('cycle detection', () => {
   };
 
   const add: Skill<[number, number], number> = {
-    func: (a: number, b: number) => a + b,
+    func: (a: number, b: number) => Promise.resolve(a + b),
     params: [
       {name: 'a', description: 'description for a', type: t.Number},
       {name: 'b', description: 'description for b', type: t.Number},

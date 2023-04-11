@@ -10,7 +10,7 @@ import * as t from '../src/types';
 //
 ///////////////////////////////////////////////////////////////////////////////
 const add: Skill<[number, number], number> = {
-  func: (a: number, b: number) => a + b,
+  func: (a: number, b: number) => Promise.resolve(a + b),
   params: [
     {name: 'a', description: 'description for a', type: t.Number},
     {name: 'b', description: 'description for b', type: t.Number},
@@ -21,7 +21,7 @@ const add: Skill<[number, number], number> = {
 };
 
 const mul: Skill<[number, number], number> = {
-  func: (a: number, b: number) => a * b,
+  func: (a: number, b: number) => Promise.resolve(a * b),
   params: [
     {name: 'a', description: 'description for a', type: t.Number},
     {name: 'b', description: 'description for b', type: t.Number},
@@ -32,7 +32,7 @@ const mul: Skill<[number, number], number> = {
 };
 
 const reverse: Skill<[string], string> = {
-  func: (s: string) => s.split('').reverse().join(''),
+  func: (s: string) => Promise.resolve(s.split('').reverse().join('')),
   params: [{name: 'text', description: 'text to reverse', type: t.String}],
   returns: {description: 'reversed text', type: t.String},
   name: 'reverse',

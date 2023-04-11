@@ -30,15 +30,11 @@ export interface ASTNode<T> extends ASTNodeBase {
   eval(context: IEvaluationContext): Promise<T>;
 }
 
-// export interface Skill<P extends unknown[] | [], R> {
-//   func: (...params: P) => R;
-//   paramsType: t.Type<P>;
-//   returnType: t.Type<R>;
-
-//   name: string;
-//   description: string;
-// }
-
+///////////////////////////////////////////////////////////////////////////////
+//
+// Skills
+//
+///////////////////////////////////////////////////////////////////////////////
 export interface Param<T> {
   name: string;
   description: string;
@@ -54,13 +50,17 @@ type ParamsFromTypes<T extends readonly unknown[] | []> = {
   -readonly [P in keyof T]: Param<T[P]>;
 };
 
-export interface Skill<P extends unknown[], R> {
-  func: (...params: P) => R;
+export interface SkillSpecification<P extends unknown[], R> {
   params: ParamsFromTypes<P>;
   returns: ReturnValue<R>;
 
   name: string;
   description: string;
+}
+
+export interface Skill<P extends unknown[], R>
+  extends SkillSpecification<P, R> {
+  func: (...params: P) => Promise<R>;
 }
 
 export interface ISkillsRepository {

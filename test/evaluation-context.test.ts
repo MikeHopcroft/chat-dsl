@@ -19,7 +19,7 @@ const position: TokenPosition = {
 describe('EvaluationContext', () => {
   test('get (memoization)', async () => {
     const add: Skill<[number, number], number> = {
-      func: jest.fn((a: number, b: number) => a + b),
+      func: jest.fn((a: number, b: number) => Promise.resolve(a + b)),
       params: [
         {name: 'a', description: 'description for a', type: t.Number},
         {name: 'b', description: 'description for b', type: t.Number},

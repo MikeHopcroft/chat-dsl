@@ -7,10 +7,11 @@
     * Example skills
   * LLM skill
     * Prompt skeleton
+    * Handlebars templates
     * Injecting parameters
     * Extracting results
     * Run method
-  * Extracting return values from skills
+    * Extracting return values from skills
 * Repo structure
   * Separate node.js dependencies from web dependencies
   * Monrepo for react app?
