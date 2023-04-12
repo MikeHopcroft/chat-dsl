@@ -1,4 +1,4 @@
-import {ASTNodeBase} from './interfaces';
+import {ASTNodeBase} from '../interfaces';
 
 export class CycleDetectedError extends Error {
   path: ASTNodeBase[];

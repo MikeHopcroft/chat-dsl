@@ -1,6 +1,6 @@
 import {TokenPosition} from 'typescript-parsec';
 
-import * as t from './types';
+import * as t from './dsl/types';
 
 export interface ISymbolTable {
   add<T>(name: string, value: ASTNode<T>): void;

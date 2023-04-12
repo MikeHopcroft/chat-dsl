@@ -1,7 +1,7 @@
 import {TokenPosition} from 'typescript-parsec';
 
 import {TypeError} from './errors';
-import {ASTNode, IEvaluationContext, ITypeCheckingContext} from './interfaces';
+import {ASTNode, IEvaluationContext, ITypeCheckingContext} from '../interfaces';
 import * as t from './types';
 
 type Promisify<T extends readonly unknown[] | []> = {
@@ -11,17 +11,6 @@ type Promisify<T extends readonly unknown[] | []> = {
 type AST<T extends readonly unknown[] | []> = {
   -readonly [P in keyof T]: ASTNode<T[P]>;
 };
-
-// type AST<T extends readonly unknown[] | []> = T extends [
-//   infer Head extends unknown,
-//   ...infer Tail extends unknown[]
-// ]
-//   ? [ASTNode<Head>, ...AST<Tail>]
-//   : [];
-
-// type AST_Type<T extends readonly unknown[] | []> = {
-//   -readonly [P in keyof T]: ASTNode<T[P]>;
-// };
 
 ///////////////////////////////////////////////////////////////////////////////
 //

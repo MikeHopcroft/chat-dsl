@@ -3,7 +3,7 @@ import {
   ISkillsRepository,
   ISymbolTable,
   Skill,
-} from './interfaces';
+} from '../interfaces';
 
 // The Context class is used during the execution stage.
 // A new Context should be created for each top-level evaluation.

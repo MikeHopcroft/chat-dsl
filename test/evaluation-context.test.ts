@@ -1,12 +1,12 @@
 import {TokenPosition} from 'typescript-parsec';
 
-import {ASTFunction, numberLiteral} from '../src/ast';
+import {ASTFunction, numberLiteral} from '../src/dsl/ast-nodes';
 
-import {EvaluationContext} from '../src/evaluation-context';
+import {EvaluationContext} from '../src/dsl/evaluation-context';
 import {Skill} from '../src/interfaces';
-import {SkillsRepository} from '../src/skills-repository';
-import {SymbolTable} from '../src/symbol-table';
-import * as t from '../src/types';
+import {SkillsRepository} from '../src/skills/skills-repository';
+import {SymbolTable} from '../src/dsl/symbol-table';
+import * as t from '../src/dsl/types';
 
 const position: TokenPosition = {
   index: 0,

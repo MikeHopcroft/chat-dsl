@@ -1,12 +1,12 @@
 import {TokenPosition} from 'typescript-parsec';
 
-import {ASTFunction, ASTReference, numberLiteral} from '../src/ast';
-import {CycleDetectedError} from '../src/errors';
+import {ASTFunction, ASTReference, numberLiteral} from '../src/dsl/ast-nodes';
+import {TypeCheckingContext} from '../src/dsl/type-checking-context';
+import {CycleDetectedError} from '../src/dsl/errors';
 import {Skill} from '../src/interfaces';
-import {SkillsRepository} from '../src/skills-repository';
-import {SymbolTable} from '../src/symbol-table';
-import {TypeCheckingContext} from '../src/type-checking-context';
-import * as t from '../src/types';
+import {SkillsRepository} from '../src/skills/skills-repository';
+import {SymbolTable} from '../src/dsl/symbol-table';
+import * as t from '../src/dsl/types';
 
 function advance(position: TokenPosition): TokenPosition {
   return {

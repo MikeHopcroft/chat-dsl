@@ -1,7 +1,11 @@
 import {TokenPosition} from 'typescript-parsec';
 
-import {booleanLiteral, numberLiteral, stringLiteral} from '../src/ast';
-import {SymbolTable} from '../src/symbol-table';
+import {
+  booleanLiteral,
+  numberLiteral,
+  stringLiteral,
+} from '../src/dsl/ast-nodes';
+import {SymbolTable} from '../src/dsl/symbol-table';
 
 const position: TokenPosition = {
   index: 0,

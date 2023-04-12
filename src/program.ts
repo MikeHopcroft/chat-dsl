@@ -1,12 +1,12 @@
-import {EvaluationContext} from './evaluation-context';
+import {EvaluationContext} from './dsl/evaluation-context';
 import {Skill, SkillSpecification} from './interfaces';
-import {llmSkill} from './llm-skill';
-import {llmSkillTemplate} from './llm-skill-template';
-import {parse, parseLiteral} from './parser';
-import {SkillsRepository} from './skills-repository';
-import {SymbolTable} from './symbol-table';
-import * as t from './types';
-import {TypeCheckingContext} from './type-checking-context';
+import {llmSkill} from './skills/llm-skill';
+import {llmSkillTemplate} from './skills/llm-skill-template';
+import {parse, parseLiteral} from './dsl/parser';
+import {SkillsRepository} from './skills/skills-repository';
+import {SymbolTable} from './dsl/symbol-table';
+import * as t from './dsl/types';
+import {TypeCheckingContext} from './dsl/type-checking-context';
 
 const add: Skill<[number, number], number> = {
   func: (a: number, b: number) => Promise.resolve(a + b),
@@ -53,7 +53,7 @@ export async function run(
   const tcContext = new TypeCheckingContext(skills, symbols);
   expression.check(tcContext);
   const evalContext = new EvaluationContext(skills, symbols);
-  // Don't need this await.
+  // Don't need this await. Consider removing.
   return await expression.eval(evalContext);
 }
 

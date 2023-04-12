@@ -1,21 +1,19 @@
 import Handlebars from 'handlebars';
 
-import {ISkillsRepository, Skill, SkillSpecification} from './interfaces';
-import {result} from './program';
-import {renderSkill} from './skills';
-import {SkillsRepository} from './skills-repository';
-import {renderType} from './types';
+import {ISkillsRepository, Skill, SkillSpecification} from '../interfaces';
+import {result} from '../program';
+import {renderType} from '../dsl/types';
 
 export function llmSkill<P extends unknown[], R>(
   spec: SkillSpecification<P, R>,
   skills: ISkillsRepository,
-  template: string,
+  template: string
 ): Skill<P, R> {
   const compiled = Handlebars.compile(template);
 
   const func = async (...params: unknown[]): Promise<R> => {
     const context = makeContext(params, spec, skills);
-    console.log(JSON.stringify(context, null, 2));
+    // console.log(JSON.stringify(context, null, 2));
 
     console.log(compiled(context));
 
@@ -42,7 +40,7 @@ function makeContext<P extends unknown[], R>(
   spec: SkillSpecification<P, R>,
   skillsRepository: ISkillsRepository
 ) {
-  const call = `${spec.name}(${params.map(p => JSON.stringify(p)).join(', ')})`
+  const call = `${spec.name}(${params.map(p => JSON.stringify(p)).join(', ')})`;
   const specContext = skillSpecificationContext(spec);
   for (const [i, p] of specContext.params.entries()) {
     (p as any).value = JSON.stringify(params[i]);

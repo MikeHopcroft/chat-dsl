@@ -23,9 +23,9 @@ import {
   booleanLiteral,
   numberLiteral,
   stringLiteral,
-} from './ast';
+} from './ast-nodes';
 
-import {ASTNode} from './interfaces';
+import {ASTNode} from '../interfaces';
 
 enum TokenKind {
   Number,

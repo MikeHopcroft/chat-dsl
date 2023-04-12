@@ -1,6 +1,5 @@
-import {SkillError} from './errors';
-import {ISkillsRepository, Skill} from './interfaces';
-import {renderSkill} from './skills';
+import {SkillError} from '../dsl/errors';
+import {ISkillsRepository, Skill} from '../interfaces';
 
 export class SkillsRepository implements ISkillsRepository {
   skills = new Map<string, Skill<unknown[], unknown>>();
@@ -29,13 +28,5 @@ export class SkillsRepository implements ISkillsRepository {
 
   allSkills(): Skill<unknown[], unknown>[] {
     return [...this.skills.values()];
-  }
-
-  render(): string {
-    const sections: string[] = [];
-    for (const skill of this.skills.values()) {
-      sections.push(renderSkill(skill));
-    }
-    return sections.join('\n');
   }
 }

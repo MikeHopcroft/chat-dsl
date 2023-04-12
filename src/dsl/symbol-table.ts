@@ -1,5 +1,5 @@
 import {SymbolError} from './errors';
-import {ASTNode} from './interfaces';
+import {ASTNode} from '../interfaces';
 
 // The Symbols class is used during the compilation stage.
 // The Symbols class maintains a mapping from identifiers to Evaluators.
