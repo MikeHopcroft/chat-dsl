@@ -65,4 +65,5 @@ export interface Skill<P extends unknown[], R>
 
 export interface ISkillsRepository {
   get(name: string): Skill<unknown[], unknown>;
+  allSkills(): Skill<unknown[], unknown>[];
 }

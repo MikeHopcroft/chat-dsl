@@ -27,6 +27,10 @@ export class SkillsRepository implements ISkillsRepository {
     return skill;
   }
 
+  allSkills(): Skill<unknown[], unknown>[] {
+    return [...this.skills.values()];
+  }
+
   render(): string {
     const sections: string[] = [];
     for (const skill of this.skills.values()) {

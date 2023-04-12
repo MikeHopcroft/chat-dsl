@@ -1,54 +1,69 @@
-import {Skill, SkillSpecification} from './interfaces';
+import Handlebars from 'handlebars';
+
+import {ISkillsRepository, Skill, SkillSpecification} from './interfaces';
 import {result} from './program';
 import {renderSkill} from './skills';
 import {SkillsRepository} from './skills-repository';
+import {renderType} from './types';
 
 export function llmSkill<P extends unknown[], R>(
   spec: SkillSpecification<P, R>,
-  skills: SkillsRepository
+  skills: ISkillsRepository,
+  template: string,
 ): Skill<P, R> {
+  const compiled = Handlebars.compile(template);
+
   const func = async (...params: unknown[]): Promise<R> => {
-    //
-    // Create the prompt
-    //
-    const lines: string[] = [];
+    const context = makeContext(params, spec, skills);
+    console.log(JSON.stringify(context, null, 2));
 
-    // Introduction
-    lines.push(
-      `You are an LLM that computes the value of the \`${spec.name}\` function.`,
-      `Here is documentation for the \`${spec.name}\` function.`
-    );
-
-    // Documentation for this function
-    lines.push(renderSkill(spec));
-
-    // Information about available skills.
-    // Can this be injected from the context?
-    lines.push('\nYou have the following skills available to you:');
-    lines.push(skills.render());
-
-    // Information about the actual parameters passed.
-    lines.push('\nHere are the values of the parameters:');
-    for (const [i, p] of params.entries()) {
-      lines.push(`* ${spec.params[i].name} = ${JSON.stringify(p)}`);
-    }
-
-    console.log(lines.join('\n'));
+    console.log(compiled(context));
 
     //
     // Call out to the LLM
     //
+    console.log('Pretending to call the LLM');
 
     //
     // Parse the result field
     //
     const text = '[1, "hi", true]';
-    console.log(text);
+    console.log(`Assume that LLM returned ${JSON.stringify(text)}`);
     const r = await result(text);
-    console.log(`Result = ${JSON.stringify(r)}`);
-    // const r = undefined as unknown;
+    console.log(`Parsed result = ${JSON.stringify(r)}`);
     return r as R;
   };
 
   return {func, ...spec};
+}
+
+function makeContext<P extends unknown[], R>(
+  params: P,
+  spec: SkillSpecification<P, R>,
+  skillsRepository: ISkillsRepository
+) {
+  const call = `${spec.name}(${params.map(p => JSON.stringify(p)).join(', ')})`
+  const specContext = skillSpecificationContext(spec);
+  for (const [i, p] of specContext.params.entries()) {
+    (p as any).value = JSON.stringify(params[i]);
+  }
+  const skills = skillsRepository
+    .allSkills()
+    .map(s => skillSpecificationContext(s));
+  return {
+    call,
+    ...specContext,
+    skills,
+  };
+}
+
+function skillSpecificationContext<P extends unknown[], R>(
+  s: SkillSpecification<P, R>
+) {
+  return {
+    ...s,
+    prototype: `${s.name}(${s.params.map(p => p.name).join(', ')})`,
+    params: s.params.map(p => ({...p, type: renderType(p.type)})),
+    returns: {...s.returns, type: renderType(s.returns.type)},
+  };
 }

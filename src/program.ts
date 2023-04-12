@@ -1,6 +1,7 @@
 import {EvaluationContext} from './evaluation-context';
 import {Skill, SkillSpecification} from './interfaces';
 import {llmSkill} from './llm-skill';
+import {llmSkillTemplate} from './llm-skill-template';
 import {parse, parseLiteral} from './parser';
 import {SkillsRepository} from './skills-repository';
 import {SymbolTable} from './symbol-table';
@@ -52,6 +53,7 @@ export async function run(
   const tcContext = new TypeCheckingContext(skills, symbols);
   expression.check(tcContext);
   const evalContext = new EvaluationContext(skills, symbols);
+  // Don't need this await.
   return await expression.eval(evalContext);
 }
 
@@ -85,6 +87,6 @@ const mySkillSpecification: SkillSpecification<[number, string], string> = {
 };
 
 // console.log(renderSkill(mySkill));
-const x = llmSkill(mySkillSpecification, skillsRepository);
+const x = llmSkill(mySkillSpecification, skillsRepository, llmSkillTemplate);
 console.log('==========================');
 x.func(1, 'hello');
