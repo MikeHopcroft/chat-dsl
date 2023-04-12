@@ -10,11 +10,11 @@ import {
   stringLiteral,
   SymbolTable,
   TypeCheckingContext,
-} from '../src/dsl';
-import * as t from '../src/dsl/types';
+} from '../../src/dsl';
+import * as t from '../../src/dsl/types';
 
-import {Skill} from '../src/interfaces';
-import {SkillsRepository} from '../src/skills';
+import {Skill} from '../../src/interfaces';
+import {SkillsRepository} from '../../src/skills';
 
 const position: TokenPosition = {
   index: 0,

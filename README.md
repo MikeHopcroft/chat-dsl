@@ -10,5 +10,5 @@
 ~~~shell
 @User ➜ /workspaces/chat-dsl (main) $ yarn install
 @User ➜ /workspaces/chat-dsl (main) $ tsc
-@User ➜ /workspaces/chat-dsl (main) $ node build/src/main.js
+@User ➜ /workspaces/chat-dsl (main) $ node build/src/apps/example1.js
 ~~~

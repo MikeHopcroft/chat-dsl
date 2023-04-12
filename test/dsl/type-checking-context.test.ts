@@ -7,11 +7,11 @@ import {
   numberLiteral,
   SymbolTable,
   TypeCheckingContext,
-} from '../src/dsl';
+} from '../../src/dsl';
 
-import * as t from '../src/dsl/types';
-import {Skill} from '../src/interfaces';
-import {SkillsRepository} from '../src/skills';
+import * as t from '../../src/dsl/types';
+import {Skill} from '../../src/interfaces';
+import {SkillsRepository} from '../../src/skills';
 
 function advance(position: TokenPosition): TokenPosition {
   return {

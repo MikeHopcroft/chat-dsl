@@ -5,7 +5,7 @@ import {
   numberLiteral,
   stringLiteral,
   SymbolTable,
-} from '../src/dsl';
+} from '../../src/dsl';
 
 const position: TokenPosition = {
   index: 0,

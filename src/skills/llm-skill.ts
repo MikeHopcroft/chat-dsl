@@ -42,23 +42,50 @@ function makeContext<P extends unknown[], R>(
   skillsRepository: ISkillsRepository
 ) {
   const call = `${spec.name}(${params.map(p => JSON.stringify(p)).join(', ')})`;
-  const specContext = skillSpecificationContext(spec);
-  for (const [i, p] of specContext.params.entries()) {
-    (p as any).value = JSON.stringify(params[i]);
+  const invocationContext = skillSpecificationContext(
+    spec
+  ) as SkillInvocationContext;
+  for (const [i, p] of invocationContext.params.entries()) {
+    p.value = JSON.stringify(params[i]);
   }
   const skills = skillsRepository
     .allSkills()
     .map(s => skillSpecificationContext(s));
   return {
+    ...invocationContext,
     call,
-    ...specContext,
     skills,
   };
 }
 
+interface SkillSpecificationContext {
+  name: string;
+  description: string;
+  prototype: string;
+  params: {
+    type: string;
+    name: string;
+    description: string;
+  }[];
+  returns: {
+    type: string;
+    description: string;
+  };
+}
+
+interface SkillInvocationContext extends SkillSpecificationContext {
+  call: string;
+  params: {
+    type: string;
+    name: string;
+    description: string;
+    value: string;
+  }[];
+}
+
 function skillSpecificationContext<P extends unknown[], R>(
   s: SkillSpecification<P, R>
-) {
+): SkillSpecificationContext {
   return {
     ...s,
     prototype: `${s.name}(${s.params.map(p => p.name).join(', ')})`,

@@ -1,6 +1,6 @@
-import * as t from './dsl/types';
-import {Skill, SkillSpecification} from './interfaces';
-import {llmSkill, llmSkillTemplate, SkillsRepository} from './skills';
+import * as t from '../dsl/types';
+import {Skill, SkillSpecification} from '../interfaces';
+import {llmSkill, llmSkillTemplate, SkillsRepository} from '../skills';
 
 const add: Skill<[number, number], number> = {
   func: (a: number, b: number) => Promise.resolve(a + b),

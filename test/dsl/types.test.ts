@@ -1,4 +1,4 @@
-import * as t from '../src/dsl/types';
+import * as t from '../../src/dsl/types';
 
 describe('primitive types', () => {
   test('primititves', () => {

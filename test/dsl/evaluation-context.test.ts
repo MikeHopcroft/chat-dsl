@@ -5,11 +5,11 @@ import {
   EvaluationContext,
   numberLiteral,
   SymbolTable,
-} from '../src/dsl';
+} from '../../src/dsl';
 
-import * as t from '../src/dsl/types';
-import {Skill} from '../src/interfaces';
-import {SkillsRepository} from '../src/skills';
+import * as t from '../../src/dsl/types';
+import {Skill} from '../../src/interfaces';
+import {SkillsRepository} from '../../src/skills';
 
 const position: TokenPosition = {
   index: 0,
