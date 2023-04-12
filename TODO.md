@@ -1,5 +1,14 @@
 # TODO List
 
+* Cleanup
+  * x index.ts files for subdirs
+  * x result() method to skills folder
+  * x run() method to dsl folder
+  * apps folder
+    * program.ts to example.ts
+    * Update README.md
+  * any in llm-skill
+* Running DSLs in skills
 * Tactical
   * Generate entire prompt with
     * Instructions for writing DSLs

@@ -1,8 +1,7 @@
-import {SkillError} from '../src/dsl/errors';
-import {Skill} from '../src/interfaces';
-import {run} from '../src/program';
-import {SkillsRepository} from '../src/skills/skills-repository';
+import {run, SkillError} from '../src/dsl';
 import * as t from '../src/dsl/types';
+import {Skill} from '../src/interfaces';
+import {SkillsRepository} from '../src/skills';
 
 ///////////////////////////////////////////////////////////////////////////////
 //

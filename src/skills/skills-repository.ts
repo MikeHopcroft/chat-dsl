@@ -1,4 +1,4 @@
-import {SkillError} from '../dsl/errors';
+import {SkillError} from '../dsl';
 import {ISkillsRepository, Skill} from '../interfaces';
 
 export class SkillsRepository implements ISkillsRepository {

@@ -1,12 +1,6 @@
-import {EvaluationContext} from './dsl/evaluation-context';
-import {Skill, SkillSpecification} from './interfaces';
-import {llmSkill} from './skills/llm-skill';
-import {llmSkillTemplate} from './skills/llm-skill-template';
-import {parse, parseLiteral} from './dsl/parser';
-import {SkillsRepository} from './skills/skills-repository';
-import {SymbolTable} from './dsl/symbol-table';
 import * as t from './dsl/types';
-import {TypeCheckingContext} from './dsl/type-checking-context';
+import {Skill, SkillSpecification} from './interfaces';
+import {llmSkill, llmSkillTemplate, SkillsRepository} from './skills';
 
 const add: Skill<[number, number], number> = {
   func: (a: number, b: number) => Promise.resolve(a + b),
@@ -42,28 +36,6 @@ const skillsRepository = new SkillsRepository();
 skillsRepository.add(add);
 skillsRepository.add(mul);
 skillsRepository.add(reverse);
-
-// console.log(skillsRepository.render());
-
-export async function run(
-  text: string,
-  skills: SkillsRepository = skillsRepository
-) {
-  const {symbols, expression} = parse(text);
-  const tcContext = new TypeCheckingContext(skills, symbols);
-  expression.check(tcContext);
-  const evalContext = new EvaluationContext(skills, symbols);
-  // Don't need this await. Consider removing.
-  return await expression.eval(evalContext);
-}
-
-export async function result(text: string) {
-  const skills = new SkillsRepository();
-  const symbols = new SymbolTable();
-  const expression = parseLiteral(text);
-  const evalContext = new EvaluationContext(skills, symbols);
-  return await expression.eval(evalContext);
-}
 
 const mySkillSpecification: SkillSpecification<[number, string], string> = {
   name: 'bulleted',

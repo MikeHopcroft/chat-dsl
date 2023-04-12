@@ -1,4 +1,3 @@
-import {CycleDetectedError} from './errors';
 import {
   ASTNode,
   ASTNodeBase,
@@ -6,7 +5,9 @@ import {
   ISymbolTable,
   ITypeCheckingContext,
   Skill,
-} from './interfaces';
+} from '../interfaces';
+
+import {CycleDetectedError} from './errors';
 
 export class TypeCheckingContext implements ITypeCheckingContext {
   skills: ISkillsRepository;

@@ -5,16 +5,16 @@ import {
   ASTReference,
   ASTTuple,
   booleanLiteral,
+  EvaluationContext,
   numberLiteral,
   stringLiteral,
-} from '../src/dsl/ast-nodes';
-
-import {EvaluationContext} from '../src/dsl/evaluation-context';
-import {TypeCheckingContext} from '../src/dsl/type-checking-context';
-import {Skill} from '../src/interfaces';
-import {SkillsRepository} from '../src/skills/skills-repository';
-import {SymbolTable} from '../src/dsl/symbol-table';
+  SymbolTable,
+  TypeCheckingContext,
+} from '../src/dsl';
 import * as t from '../src/dsl/types';
+
+import {Skill} from '../src/interfaces';
+import {SkillsRepository} from '../src/skills';
 
 const position: TokenPosition = {
   index: 0,
@@ -169,14 +169,3 @@ describe('compound types', () => {
 
   // Cycles
 });
-
-// describe('Symbols', () => {
-//   test('number', () => {
-//     expect(true).toBe(true);
-//   });
-// });
-// describe('Context', () => {
-//   test('number', () => {
-//     expect(true).toBe(true);
-//   });
-// });

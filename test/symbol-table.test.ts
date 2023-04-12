@@ -4,8 +4,8 @@ import {
   booleanLiteral,
   numberLiteral,
   stringLiteral,
-} from '../src/dsl/ast-nodes';
-import {SymbolTable} from '../src/dsl/symbol-table';
+  SymbolTable,
+} from '../src/dsl';
 
 const position: TokenPosition = {
   index: 0,

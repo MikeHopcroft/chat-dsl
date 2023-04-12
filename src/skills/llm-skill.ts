@@ -1,8 +1,9 @@
 import Handlebars from 'handlebars';
 
-import {ISkillsRepository, Skill, SkillSpecification} from '../interfaces';
-import {result} from '../program';
 import {renderType} from '../dsl/types';
+import {ISkillsRepository, Skill, SkillSpecification} from '../interfaces';
+
+import {result} from './result';
 
 export function llmSkill<P extends unknown[], R>(
   spec: SkillSpecification<P, R>,
