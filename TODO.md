@@ -8,7 +8,20 @@
     * x program.ts to example.ts
     * x Update README.md
   * x any in llm-skill
+  * Rename parse-results.ts and evaluate()
+  * Tags for regions
+  * Chat memory (scenario: execute code block, append result, continue)
+    * How do you know when the LLM is done?
+* Handlebars option for HTML escaping
+* Better example and documentation
+* Logging
+  * By UUID and time stamp.
+  * Print log
+    * Call tree
+    * Verbose mode
 * Running DSLs in skills
+* Filtering skills in repository
+* Running different types of fenced code blocks (e.g. dsl, TypeScript)
 * Tactical
   * Generate entire prompt with
     * Instructions for writing DSLs

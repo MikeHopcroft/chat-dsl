@@ -6,6 +6,8 @@ export async function invokeLLM(prompt: string, uuid: string, call: string) {
 
   // TODO: log uuid, call site, and prompt here.
 
+  // Pretend to make call to LLM and then return hard-coded response
+  // here, based on the call.
   let result = '';
   if (call === 'bulleted(1, "hello")') {
     result = '~~~dsl\na=1\nb =2\nreturn add(a,b)\n~~~';
