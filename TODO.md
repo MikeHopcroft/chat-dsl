@@ -15,12 +15,12 @@
     * Documentation for skills
     * Example skills
   * LLM skill
-    * Prompt skeleton
-    * Handlebars templates
-    * Injecting parameters
-    * Extracting results
-    * Run method
-    * Extracting return values from skills
+    * x Prompt skeleton
+    * x Handlebars templates
+    * x Injecting parameters
+    * . Extracting results
+    * . Run method
+    * . Extracting return values from skills
 * Repo structure
   * Separate node.js dependencies from web dependencies
   * Monrepo for react app?

@@ -1,9 +1,11 @@
-import {EvaluationContext, parse, TypeCheckingContext} from '.';
+import {ISkillsRepository} from '../interfaces';
 import {SkillsRepository} from '../skills';
+
+import {EvaluationContext, parse, TypeCheckingContext} from '.';
 
 export async function run(
   text: string,
-  skills: SkillsRepository = new SkillsRepository()
+  skills: ISkillsRepository = new SkillsRepository()
 ) {
   const {symbols, expression} = parse(text);
   const tcContext = new TypeCheckingContext(skills, symbols);

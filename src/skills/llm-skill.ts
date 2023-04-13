@@ -1,9 +1,11 @@
 import Handlebars from 'handlebars';
+import {v4 as uuidv4} from 'uuid';
 
 import {renderType} from '../dsl/types';
 import {ISkillsRepository, Skill, SkillSpecification} from '../interfaces';
 
-import {result} from './result';
+import {invokeLLM} from '../skills/invoke-llm';
+import {evaluate} from './parseResult';
 
 export function llmSkill<P extends unknown[], R>(
   spec: SkillSpecification<P, R>,
@@ -14,21 +16,17 @@ export function llmSkill<P extends unknown[], R>(
 
   const func = async (...params: unknown[]): Promise<R> => {
     const context = makeContext(params, spec, skills);
-    // console.log(JSON.stringify(context, null, 2));
-
-    console.log(compiled(context));
+    const prompt = compiled(context);
 
     //
     // Call out to the LLM
     //
-    console.log('Pretending to call the LLM');
+    const result = await invokeLLM(prompt, context.uuid, context.call);
 
     //
     // Parse the result field
     //
-    const text = '[1, "hi", true]';
-    console.log(`Assume that LLM returned ${JSON.stringify(text)}`);
-    const r = await result(text);
+    const r = await evaluate(result, skills);
     console.log(`Parsed result = ${JSON.stringify(r)}`);
     return r as R;
   };
@@ -41,6 +39,7 @@ function makeContext<P extends unknown[], R>(
   spec: SkillSpecification<P, R>,
   skillsRepository: ISkillsRepository
 ) {
+  const uuid = uuidv4();
   const call = `${spec.name}(${params.map(p => JSON.stringify(p)).join(', ')})`;
   const invocationContext = skillSpecificationContext(
     spec
@@ -53,6 +52,7 @@ function makeContext<P extends unknown[], R>(
     .map(s => skillSpecificationContext(s));
   return {
     ...invocationContext,
+    uuid,
     call,
     skills,
   };
@@ -74,6 +74,7 @@ interface SkillSpecificationContext {
 }
 
 interface SkillInvocationContext extends SkillSpecificationContext {
+  uuid: string;
   call: string;
   params: {
     type: string;
