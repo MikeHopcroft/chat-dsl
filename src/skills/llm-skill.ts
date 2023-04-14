@@ -5,7 +5,7 @@ import {v4 as uuidv4} from 'uuid';
 import {Action} from '../dsl';
 import {renderType} from '../dsl/types';
 import {ISkillsRepository, Skill, SkillSpecification} from '../interfaces';
-import {invokeLLM} from '../skills/invoke-llm';
+import {invokeMockLLM} from './invoke-mock-llm';
 
 import {getSkillResult} from './parseResult';
 
@@ -51,7 +51,7 @@ export function llmSkill<P extends unknown[], R>(
       //
       // Call out to the LLM
       //
-      const dsl = await invokeLLM(
+      const dsl = await invokeMockLLM(
         conversation.text(),
         context.uuid,
         context.call,

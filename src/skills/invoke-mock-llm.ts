@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-export async function invokeLLM(
+export async function invokeMockLLM(
   prompt: string,
   uuid: string,
   call: string,

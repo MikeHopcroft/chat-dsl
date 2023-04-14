@@ -2,7 +2,7 @@ import * as t from '../dsl/types';
 import {SkillSpecification} from '../interfaces';
 import {llmSkill} from '../skills';
 
-import {skillsRepository} from './skills';
+import {sampleSkills} from './sample-skills';
 
 const spec: SkillSpecification<[number, string], string> = {
   name: 'bulleted',
@@ -54,5 +54,5 @@ Here are the values of the parameters that were passed to you:
 You should respond with the return value of {{{call}}}
 `;
 
-const bulleted = llmSkill(spec, skillsRepository, promptTemplate, 5);
+const bulleted = llmSkill(spec, sampleSkills, promptTemplate, 5);
 bulleted.func(1, 'hello');

@@ -32,7 +32,7 @@ const reverse: Skill<[string], string> = {
   description: 'reverses a string',
 };
 
-export const skillsRepository = new SkillsRepository();
-skillsRepository.add(add);
-skillsRepository.add(mul);
-skillsRepository.add(reverse);
+export const sampleSkills = new SkillsRepository();
+sampleSkills.add(add);
+sampleSkills.add(mul);
+sampleSkills.add(reverse);
