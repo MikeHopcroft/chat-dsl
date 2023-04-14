@@ -1,34 +1,77 @@
+import chalk from 'chalk';
 import Handlebars from 'handlebars';
 import {v4 as uuidv4} from 'uuid';
 
+import {Action} from '../dsl';
 import {renderType} from '../dsl/types';
 import {ISkillsRepository, Skill, SkillSpecification} from '../interfaces';
-
 import {invokeLLM} from '../skills/invoke-llm';
+
 import {getSkillResult} from './parseResult';
+
+class Conversation {
+  sections: string[] = [];
+  logger: (text: string) => void;
+
+  constructor(logger: (text: string) => void = () => {}) {
+    this.logger = logger;
+  }
+
+  turn(role: string, type: string, ...parts: string[]) {
+    const heading = `[${role}](#${type})`;
+    this.logger(heading);
+    this.sections.push(heading);
+    for (const part of parts) {
+      this.logger(part);
+      this.sections.push(part);
+    }
+    this.logger('');
+    this.sections.push('');
+  }
+
+  text(): string {
+    return this.sections.join('\n');
+  }
+}
 
 export function llmSkill<P extends unknown[], R>(
   spec: SkillSpecification<P, R>,
   skills: ISkillsRepository,
-  template: string
+  template: string,
+  maxSteps: number
 ): Skill<P, R> {
   const compiled = Handlebars.compile(template);
 
   const func = async (...params: unknown[]): Promise<R> => {
     const context = makeContext(params, spec, skills);
-    const prompt = compiled(context);
+    const conversation = new Conversation(console.log);
+    conversation.turn('system', 'instructions', compiled(context));
 
-    //
-    // Call out to the LLM
-    //
-    const result = await invokeLLM(prompt, context.uuid, context.call);
+    for (let i = 0; i < maxSteps; ++i) {
+      //
+      // Call out to the LLM
+      //
+      const dsl = await invokeLLM(
+        conversation.text(),
+        context.uuid,
+        context.call,
+        i
+      );
 
-    //
-    // Parse the result field
-    //
-    const r = await getSkillResult(result, skills);
-    console.log(`Parsed result = ${JSON.stringify(r)}`);
-    return r as R;
+      conversation.turn('assistant', 'message', dsl);
+
+      //
+      // Parse the result field
+      //
+      const {action, value} = await getSkillResult(dsl, skills);
+      conversation.turn('dsl', 'message', JSON.stringify(value));
+      if (action === Action.Return) {
+        console.log(chalk.red(`LLM returns ${JSON.stringify(value)}`));
+        return value as R;
+      }
+    }
+
+    throw new Error(`Exceeded maximum step count of ${maxSteps}.`);
   };
 
   return {func, ...spec};

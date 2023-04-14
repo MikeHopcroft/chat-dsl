@@ -5,7 +5,6 @@ import {
   expectEOF,
   expectSingleResult,
   kmid,
-  kright,
   list_sc,
   opt,
   rep_sc,
@@ -31,6 +30,7 @@ enum TokenKind {
   Number,
   String,
   Boolean,
+  Use,
   Return,
   Identifier,
   LBracket,
@@ -47,6 +47,7 @@ const lexer = buildLexer([
   [true, /^-?\d+(\.\d+)?/g, TokenKind.Number],
   [true, /^"[^"]*"/g, TokenKind.String],
   [true, /^(true|false)/g, TokenKind.Boolean],
+  [true, /^use/g, TokenKind.Use],
   [true, /^return/g, TokenKind.Return],
   [true, /^[a-zA-Z_]+[a-zA-Z_0-9]*/g, TokenKind.Identifier],
   [true, /^\[/g, TokenKind.LBracket],
@@ -75,11 +76,10 @@ const lexer = buildLexer([
 //   CALL
 //   Identifier
 //
+// USE = 'use' EXPR
 // RETURN = 'return' EXPR
 //
-// PROGRAM = VARDEC* RETURN
-
-// console.log(JSON.stringify(tokens, null, 2));
+// PROGRAM = VARDEC* (USE | RETURN)
 
 import {SymbolTable} from './symbol-table';
 
@@ -193,22 +193,36 @@ VARDEC.setPattern(
   )
 );
 
-const RETURN = kright(tok(TokenKind.Return), EXPR);
-
 const PROGRAM = rule<TokenKind, Program>();
-PROGRAM.setPattern(apply(seq(rep_sc(VARDEC), RETURN), applyProgram));
+PROGRAM.setPattern(
+  apply(
+    seq(rep_sc(VARDEC), alt(tok(TokenKind.Use), tok(TokenKind.Return)), EXPR),
+    applyProgram
+  )
+);
+
+export enum Action {
+  Use,
+  Return,
+}
 
 export interface Program {
   symbols: SymbolTable;
+  action: Action;
   expression: ASTNode<unknown>;
 }
 
-function applyProgram([vardecs, expression]: [
+function applyProgram([vardecs, action, expression]: [
   VarDec[],
+  Token<TokenKind.Use> | Token<TokenKind.Return>,
   ASTNode<unknown>
 ]): Program {
   const symbols = new SymbolTable(vardecs.map(x => [x.symbol, x.node]));
-  return {symbols, expression};
+  return {
+    symbols,
+    action: action.kind === TokenKind.Use ? Action.Use : Action.Return,
+    expression,
+  };
 }
 
 export function parse(text: string): Program {
@@ -218,19 +232,3 @@ export function parse(text: string): Program {
 export function parseLiteral(text: string): ASTNode<unknown> {
   return expectSingleResult(expectEOF(LITERAL_EXPR.parse(lexer.parse(text))));
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// let token = lexer.parse('a=b(1,2) // hi there \nreturn a');
-// while (token !== undefined) {
-//   console.log(`${tokenNames[token.kind]}: "${token.text}"`);
-//   token = token.next;
-// }
-
-// const text = 'a = [1, "hi", [1,2,3], abc, true, false]';
-// const a = expectSingleResult(expectEOF(EXPR.parse(lexer.parse(text))));
-// console.log(a);
-
-// const text = 'a = [1, "hi", [1,2,3], abc, true, false] \n return 54321';
-// // const text = 'return 1';
-// const a = expectSingleResult(expectEOF(PROGRAM.parse(lexer.parse(text))));
-// console.log(a);

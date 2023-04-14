@@ -1,43 +1,10 @@
 import * as t from '../dsl/types';
-import {Skill, SkillSpecification} from '../interfaces';
-import {llmSkill, llmSkillTemplate, SkillsRepository} from '../skills';
+import {SkillSpecification} from '../interfaces';
+import {llmSkill} from '../skills';
 
-const add: Skill<[number, number], number> = {
-  func: (a: number, b: number) => Promise.resolve(a + b),
-  params: [
-    {name: 'a', description: 'description for a', type: t.Number},
-    {name: 'b', description: 'description for b', type: t.Number},
-  ],
-  returns: {description: 'the sum `a + b`', type: t.Number},
-  name: 'add',
-  description: 'adds two numbers',
-};
+import {skillsRepository} from './skills';
 
-const mul: Skill<[number, number], number> = {
-  func: (a: number, b: number) => Promise.resolve(a * b),
-  params: [
-    {name: 'a', description: 'description for a', type: t.Number},
-    {name: 'b', description: 'description for b', type: t.Number},
-  ],
-  returns: {description: 'the product `a * b`', type: t.Number},
-  name: 'mul',
-  description: 'multiples two numbers',
-};
-
-const reverse: Skill<[string], string> = {
-  func: (s: string) => Promise.resolve(s.split('').reverse().join('')),
-  params: [{name: 'text', description: 'text to reverse', type: t.String}],
-  returns: {description: 'the reversed text', type: t.String},
-  name: 'reverse',
-  description: 'reverses a string',
-};
-
-const skillsRepository = new SkillsRepository();
-skillsRepository.add(add);
-skillsRepository.add(mul);
-skillsRepository.add(reverse);
-
-const mySkillSpecification: SkillSpecification<[number, string], string> = {
+const spec: SkillSpecification<[number, string], string> = {
   name: 'bulleted',
   description: 'A function that generates a numbered list item.',
   params: [
@@ -58,7 +25,34 @@ const mySkillSpecification: SkillSpecification<[number, string], string> = {
   },
 };
 
-// console.log(renderSkill(mySkill));
-const x = llmSkill(mySkillSpecification, skillsRepository, llmSkillTemplate);
-console.log('==========================');
-x.func(1, 'hello');
+const promptTemplate = `
+You are an LLM that computes the value of the \`{{name}}\` function.
+Here is documentation for the \`{{name}}\` function.
+
+{{prototype}}
+{{#each params}}
+* {{name}}: {{type}} - {{{description}}}
+{{/each}}
+
+You have the following skills available to you:
+{{#each skills}}
+* {{prototype}}
+  * Description: {{{description}}}
+  * Parameters:
+  {{#each params}}
+    * {{name}} {{type}} - {{{description}}}
+  {{/each}}
+  * Returns:
+    * {{returns.type}} - {{{returns.description}}}
+{{/each}}
+
+Here are the values of the parameters that were passed to you:
+{{#each params}}
+* {{name}} = {{{value}}}
+{{/each}}
+
+You should respond with the return value of {{{call}}}
+`;
+
+const bulleted = llmSkill(spec, skillsRepository, promptTemplate, 5);
+bulleted.func(1, 'hello');

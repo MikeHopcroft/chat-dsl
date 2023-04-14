@@ -1,8 +1,16 @@
-export async function invokeLLM(prompt: string, uuid: string, call: string) {
-  console.log('======================================');
-  console.log(`LLM call ${uuid}: ${call} `);
-  console.log('Prompt:');
-  console.log(prompt);
+import chalk from 'chalk';
+
+export async function invokeLLM(
+  prompt: string,
+  uuid: string,
+  call: string,
+  iteration: number
+) {
+  console.log(
+    chalk.green(
+      `LLM call ${uuid}: ${call} ${iteration && `(iteration ${iteration})`}`
+    )
+  );
 
   // TODO: log uuid, call site, and prompt here.
 
@@ -10,13 +18,16 @@ export async function invokeLLM(prompt: string, uuid: string, call: string) {
   // here, based on the call.
   let result = '';
   if (call === 'bulleted(1, "hello")') {
-    result = '~~~dsl\na=1\nb =2\nreturn add(a,b)\n~~~';
+    if (iteration === 0) {
+      // First iteration hard-coded to demonstrate `use` semantics.
+      result = '~~~dsl\na=1\nb=2\nuse add(a,b)\n~~~';
+    } else {
+      // Second iteration hard-coded to demonstrate `return` semantics.
+      result = '~~~dsl\na=3\nb=4\nreturn mul(a,b)\n~~~';
+    }
   } else {
     result = '~~~dsl\nreturn 123\n~~~';
   }
-
-  console.log('LLM returns:');
-  console.log(result);
 
   return result;
 }
