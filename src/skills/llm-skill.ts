@@ -5,7 +5,7 @@ import {renderType} from '../dsl/types';
 import {ISkillsRepository, Skill, SkillSpecification} from '../interfaces';
 
 import {invokeLLM} from '../skills/invoke-llm';
-import {evaluate} from './parseResult';
+import {getSkillResult} from './parseResult';
 
 export function llmSkill<P extends unknown[], R>(
   spec: SkillSpecification<P, R>,
@@ -26,7 +26,7 @@ export function llmSkill<P extends unknown[], R>(
     //
     // Parse the result field
     //
-    const r = await evaluate(result, skills);
+    const r = await getSkillResult(result, skills);
     console.log(`Parsed result = ${JSON.stringify(r)}`);
     return r as R;
   };

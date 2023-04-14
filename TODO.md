@@ -34,10 +34,13 @@
     * . Extracting results
     * . Run method
     * . Extracting return values from skills
+* Parser
+  * Numbers - floats, NaN, Infinity
+  * Strings - single + double quotes, escaping
 * Repo structure
   * Separate node.js dependencies from web dependencies
   * Monrepo for react app?
-  * Move dsl to dsl folder
+  * x Move dsl to dsl folder
 * REPL
   * commander
   * REPL
