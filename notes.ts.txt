@@ -1,0 +1,20 @@
+async function orchestrate(prompt: Conversation) {
+  for (let i = 0; i < MAX_ITERATIONS; ++i) {
+    // Ask the model for the next task
+    const task = await model(prompt);
+
+    // Run the task for the model
+    const result = await run(task);
+
+    // Either
+    if (result.use) {
+      // hand the results to the model
+      prompt.append(result);
+    } else {
+      // or return them to our caller
+      return result;
+    }
+  }
+
+  throw new Error('Failed to answer');
+}
