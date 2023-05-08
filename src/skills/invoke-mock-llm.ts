@@ -12,9 +12,7 @@ export async function invokeMockLLM(
   iteration: number
 ) {
   console.log(
-    chalk.green(
-      `LLM call ${uuid}: ${call} ${iteration && `(iteration ${iteration})`}`
-    )
+    chalk.green(`LLM call ${uuid}: ${call} (iteration ${iteration})`)
   );
 
   // TODO: log uuid, call site, and prompt here.
